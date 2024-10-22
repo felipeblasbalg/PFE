@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 
 # Configuração da página
 st.set_page_config(page_title="Análise de Dados", layout="wide")
@@ -24,13 +23,30 @@ def upload_page():
     # Se o arquivo for carregado
     if uploaded_file is not None:
         st.success("✅ Arquivo carregado com sucesso!")
-        st.write("Clique no botão abaixo para analisar os dados.")
         
         # Botão para analisar os dados
         if st.button("🔍 Analisar os Dados"):
-            # Salvar o arquivo no estado da sessão
-            st.session_state['uploaded_file'] = uploaded_file
-            st.session_state['page'] = 'analysis'
+            try:
+                # Verificar se o arquivo contém dados
+                if uploaded_file.name.endswith('.csv'):
+                    df = pd.read_csv(uploaded_file, delimiter=',')  # Definir delimitador padrão como vírgula
+                else:
+                    df = pd.read_excel(uploaded_file)
+                
+                if df.empty:
+                    st.warning("O arquivo está vazio ou mal formatado. Por favor, verifique o conteúdo.")
+                else:
+                    # Salvar o arquivo no estado da sessão
+                    st.session_state['uploaded_file'] = uploaded_file
+                    st.session_state['page'] = 'analysis'
+                    st.rerun()
+                    
+            except pd.errors.ParserError as e:
+                st.error("Erro ao processar o arquivo. Certifique-se de que o arquivo está no formato correto.")
+            except pd.errors.EmptyDataError:
+                st.error("O arquivo não contém dados para análise. Verifique se o arquivo está vazio.")
+            except Exception as e:
+                st.error(f"Erro inesperado ao processar o arquivo: {e}")
 
 # Página de análise dos dados
 def analysis_page():
@@ -43,57 +59,71 @@ def analysis_page():
 
     file = st.session_state['uploaded_file']
     
-    # Ler o arquivo
-    if file.name.endswith('.csv'):
-        df = pd.read_csv(file)
-    else:
-        df = pd.read_excel(file)
+    try:
+        # Ler o arquivo
+        if file.name.endswith('.csv'):
+            df = pd.read_csv(file, delimiter=',')  # Usar delimitador padrão
+        else:
+            df = pd.read_excel(file)
+        
+        # Verificar se o arquivo contém dados
+        if df.empty:
+            st.warning("O arquivo está vazio ou mal formatado.")
+            return
 
-    # Filtrar colunas numéricas
-    df_numeric = df.select_dtypes(include=['number'])
+        # Filtrar colunas numéricas
+        df_numeric = df.select_dtypes(include=['number'])
 
-    if df_numeric.empty:
-        st.warning("O arquivo não contém colunas numéricas para análise.")
-        return
+        if df_numeric.empty:
+            st.warning("O arquivo não contém colunas numéricas para análise.")
+            return
 
-    # Dashboard com Plotly
-    st.subheader("📊 Dashboard de Análise")
+        # Dashboard com Plotly
+        st.subheader("📊 Dashboard de Análise")
 
-    # Exibir algumas estatísticas básicas
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Número de Linhas", df.shape[0])
-    col2.metric("Número de Colunas", df.shape[1])
-    col3.metric("Colunas Numéricas", df_numeric.shape[1])
+        # Exibir algumas estatísticas básicas
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Número de Linhas", df.shape[0])
+        col2.metric("Número de Colunas", df.shape[1])
+        col3.metric("Colunas Numéricas", df_numeric.shape[1])
 
-    # Gráficos com Plotly
-    st.subheader("Gráficos Interativos")
+        # Gráficos com Plotly
+        st.subheader("Gráficos Interativos")
 
-    # Gráfico de linhas - Exemplo com as duas primeiras colunas numéricas (primeiro gráfico)
-    if df_numeric.shape[1] >= 2:
-        line_fig = px.line(df_numeric, x=df_numeric.index, y=df_numeric.columns[:2],
-                           title="Gráfico de Linhas",
-                           labels={"index": "Índice", "value": "Valor"},
-                           template="plotly_dark")
-        st.plotly_chart(line_fig)
+        # Gráfico de linhas - Exemplo com as duas primeiras colunas numéricas (primeiro gráfico)
+        if df_numeric.shape[1] >= 2:
+            line_fig = px.line(df_numeric, x=df_numeric.index, y=df_numeric.columns[:2],
+                               title="Gráfico de Linhas",
+                               labels={"index": "Índice", "value": "Valor"},
+                               template="plotly_dark")
+            st.plotly_chart(line_fig)
 
-    # Gráfico de dispersão (Scatter plot) - Exemplo com as duas primeiras colunas numéricas
-    if df_numeric.shape[1] >= 2:
-        scatter_fig = px.scatter(df_numeric, x=df_numeric.columns[0], y=df_numeric.columns[1],
-                                 title="Gráfico de Dispersão",
-                                 labels={df_numeric.columns[0]: "Eixo X", df_numeric.columns[1]: "Eixo Y"},
-                                 template="plotly_dark")
-        st.plotly_chart(scatter_fig)
+        # Gráfico de dispersão (Scatter plot) - Exemplo com as duas primeiras colunas numéricas
+        if df_numeric.shape[1] >= 2:
+            scatter_fig = px.scatter(df_numeric, x=df_numeric.columns[0], y=df_numeric.columns[1],
+                                     title="Gráfico de Dispersão",
+                                     labels={df_numeric.columns[0]: "Eixo X", df_numeric.columns[1]: "Eixo Y"},
+                                     template="plotly_dark")
+            st.plotly_chart(scatter_fig)
 
-    # Gráfico de barras - Exemplo com a primeira coluna numérica
-    bar_fig = px.bar(df_numeric, x=df_numeric.index, y=df_numeric.columns[0],
-                     title="Gráfico de Barras",
-                     labels={"index": "Índice", df_numeric.columns[0]: df_numeric.columns[0]},
-                     template="plotly_dark")
-    st.plotly_chart(bar_fig)
+        # Gráfico de barras - Exemplo com a primeira coluna numérica
+        bar_fig = px.bar(df_numeric, x=df_numeric.index, y=df_numeric.columns[0],
+                         title="Gráfico de Barras",
+                         labels={"index": "Índice", df_numeric.columns[0]: df_numeric.columns[0]},
+                         template="plotly_dark")
+        st.plotly_chart(bar_fig)
     
+    except pd.errors.ParserError as e:
+        st.error("Erro ao processar o arquivo. Certifique-se de que o arquivo está no formato correto.")
+    except pd.errors.EmptyDataError:
+        st.error("O arquivo não contém dados para análise. Verifique se o arquivo está vazio.")
+    except Exception as e:
+        st.error(f"Erro durante a análise dos dados: {e}")
+
     # Adicionar funcionalidade ao botão "Voltar para a Página Principal"
     if st.button("Voltar para a Página Principal"):
         st.session_state['page'] = 'upload'
+        st.rerun()
 
 # Verificar qual página exibir
 if 'page' not in st.session_state:
@@ -131,15 +161,6 @@ st.markdown("""
     }
     .css-1q8dd3e p {
         font-size: 18px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-# Adicionar uma imagem de fundo na página de upload
-st.markdown("""
-    <style>
-    .css-1d391kg {
-        background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
     }
     </style>
     """, unsafe_allow_html=True)
