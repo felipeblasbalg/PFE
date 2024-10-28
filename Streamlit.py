@@ -7,23 +7,19 @@ st.set_page_config(page_title="Análise de Dados", layout="wide")
 image1 = "logoInsper3.png"
 image2 = "logoAlupar.png"
 
-# Criar três colunas e exibir as imagens centralizadas horizontalmente
-col1, col2, col3 = st.columns([2, 1, 2])  # Ajuste as proporções conforme necessário
+# Criar três colunas: uma vazia para empurrar as imagens para o canto direito
+col1, col2, col3 = st.columns([6, 0.7, 0.5])  # Ajuste as proporções conforme necessário
 
-# Deixar a primeira e terceira colunas vazias para centralizar a coluna do meio
+# Deixar a primeira coluna vazia para alinhamento
 with col1:
     st.empty()
 
+# Exibir as duas imagens na segunda e terceira colunas, lado a lado e alinhadas à direita
 with col2:
-    # Exibir as imagens uma ao lado da outra na coluna central
-    col2_1, col2_2 = st.columns(2)
-    with col2_1:
-        st.image(image1, width=88)
-    with col2_2:
-        st.image(image2, width=100)
+    st.image(image1, width=88)
 
 with col3:
-    st.empty()
+    st.image(image2, width=100)
     
 # Definição das páginas
 def upload_page():
