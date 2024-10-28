@@ -28,45 +28,48 @@ def upload_page():
     st.markdown("""
     <div style="background-color: #1f77b4; padding: 20px; border-radius: 10px;">
         <h1 style="color: white; text-align: center;">Caro Operador, Bem-Vindo!</h1>
-        <p style="color: #f0f0f0; text-align: center;">Anexe dois arquivos CSV ou XLSX abaixo para começar a análise.</p>
+        <p style="color: #f0f0f0; text-align: center;">Anexe os arquivos necessários para começar a análise.</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Upload dos arquivos com limite máximo de 2 arquivos
-    uploaded_files = st.file_uploader("📂 Anexar até 2 Arquivos (CSV ou XLSX)", type=['csv', 'xlsx'], accept_multiple_files=True)
+    # Upload dos arquivos separados para Nível do Poço e Histórico de Alarmes
+    st.subheader("📂 Anexar Arquivo do Nível do Poço (CSV ou XLSX)")
+    file_nivel_poco = st.file_uploader("Anexe o arquivo do Nível do Poço", type=['csv', 'xlsx'], key="nivel_poco")
 
-    # Verificar a quantidade de arquivos carregados
-    if uploaded_files:
-        if len(uploaded_files) > 2:
-            st.warning("⚠️ Por favor, anexe no máximo dois arquivos.")
-        elif len(uploaded_files) < 2:
-            st.warning("⚠️ Por favor, anexe mais um arquivo para realizar a análise.")
-        else:
-            st.success("✅ Dois arquivos carregados com sucesso!")
-            
-            # Botão para analisar os dados
-            if st.button("🔍 Analisar os Dados"):
-                try:
-                    # Salvar os arquivos no estado da sessão
-                    st.session_state['uploaded_files'] = uploaded_files
-                    st.session_state['page'] = 'analysis'
-                    st.rerun()
-                        
-                except Exception as e:
-                    st.error(f"Erro inesperado ao processar os arquivos: {e}")
-    else:
-        st.info("Por favor, anexe dois arquivos CSV ou XLSX para continuar.")
+    st.subheader("📂 Anexar Arquivo do Histórico de Alarmes (CSV ou XLSX)")
+    file_historico_alarmes = st.file_uploader("Anexe o arquivo do Histórico de Alarmes", type=['csv', 'xlsx'], key="historico_alarmes")
+
+    # Verificar se os arquivos foram carregados corretamente
+    if file_nivel_poco and file_historico_alarmes:
+        st.success("✅ Ambos os arquivos foram carregados com sucesso!")
+    elif file_nivel_poco or file_historico_alarmes:
+        st.warning("⚠️ Por favor, anexe ambos os arquivos para prosseguir.")
+    
+    # Botão para iniciar a análise (visível apenas quando ambos os arquivos estão carregados)
+    if file_nivel_poco and file_historico_alarmes:
+        # Botão "Análise das Bombas de Drenagem e Esgotamento UHE SJO"
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        if st.button("🔍 Análisar os Dados"):
+            try:
+                # Salvar os arquivos no estado da sessão
+                st.session_state['file_nivel_poco'] = file_nivel_poco
+                st.session_state['file_historico_alarmes'] = file_historico_alarmes
+                st.session_state['page'] = 'analysis'
+                st.rerun()
+            except Exception as e:
+                st.error(f"Erro inesperado ao processar os arquivos: {e}")
 
 # Página de análise dos dados
 def analysis_page():
     st.title("📈 Resultados da Análise de Dados")
     
     # Verificar se os arquivos foram carregados
-    if 'uploaded_files' not in st.session_state:
-        st.warning("Por favor, volte para a página de upload e anexe dois arquivos.")
+    if 'file_nivel_poco' not in st.session_state or 'file_historico_alarmes' not in st.session_state:
+        st.warning("Por favor, volte para a página de upload e anexe ambos os arquivos.")
         return
 
-    file1, file2 = st.session_state['uploaded_files']
+    file1 = st.session_state['file_nivel_poco']
+    file2 = st.session_state['file_historico_alarmes']
     
     try:
         # Ler os arquivos
