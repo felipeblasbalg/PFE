@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-#
+
 # Configuração da página
 st.set_page_config(page_title="Análise de Dados", layout="wide")
 image1 = "logoInsper3.png"
@@ -20,8 +19,33 @@ with col2:
 
 with col3:
     st.image(image2, width=100)
+
+# Dados de login (em um sistema real, estas informações deveriam estar em um banco de dados seguro)
+user_credentials = {
+    "admin": "senha",  # Exemplo de credencial
+    "operador1": "alupar"
+}
+
+# Função de verificação de login
+def login_page():
+    st.title("🔐 Login")
     
-# Definição das páginas
+    # Criar um formulário para capturar a entrada de usuário e senha
+    with st.form("login_form"):
+        username = st.text_input("Usuário")
+        password = st.text_input("Senha", type="password")
+        submit_button = st.form_submit_button("Login")
+        
+        if submit_button:
+            if username in user_credentials and user_credentials[username] == password:
+                st.success("Login bem-sucedido!")
+                st.session_state['logged_in'] = True
+                st.session_state['current_page'] = 'upload_page'
+                st.rerun()
+            else:
+                st.error("Usuário ou senha incorretos. Tente novamente.")
+
+# Função da página de upload
 def upload_page():
     st.title("📊 Análise de Dados")
     
@@ -40,116 +64,77 @@ def upload_page():
     st.subheader("📂 Anexar Arquivo do Histórico de Alarmes (CSV ou XLSX)")
     file_historico_alarmes = st.file_uploader("Anexe o arquivo do Histórico de Alarmes", type=['csv', 'xlsx'], key="historico_alarmes")
 
-    # Verificar se os arquivos foram carregados corretamente
+    # Mostrar o botão "Verificar Dados" apenas quando ambos os arquivos forem anexados
     if file_nivel_poco and file_historico_alarmes:
-        st.success("✅ Ambos os arquivos foram carregados com sucesso!")
+        if st.button("Verificar e Analisar Dados"):
+            with st.spinner("Verificando e Analisando Dados..."):
+                try:
+                    # Ler os arquivos e armazenar na sessão para não repetir a leitura
+                    st.session_state['df_nivel_poco'] = pd.read_csv(file_nivel_poco) if file_nivel_poco.name.endswith('.csv') else pd.read_excel(file_nivel_poco)
+                    st.session_state['df_historico_alarmes'] = pd.read_csv(file_historico_alarmes) if file_historico_alarmes.name.endswith('.csv') else pd.read_excel(file_historico_alarmes)
+
+                    # Verificar as colunas esperadas
+                    colunas_nivel_poco = ["TAG", "Data", "Valor"]
+                    colunas_historico_alarmes = ["E3TimeStamp", "Acked", "Area", "ActorID", "ConditionActive", "EventType",
+                                                 "Message", "Severity", "InTime", "OutTime", "AckTime", 
+                                                 "FullAlarmSourceName", "FormattedValue", "Quality", 
+                                                 "AlarmSourceName", "EventTime", "InTimeMS", "Source"]
+
+                    if set(colunas_nivel_poco).issubset(st.session_state['df_nivel_poco'].columns) and \
+                       set(colunas_historico_alarmes).issubset(st.session_state['df_historico_alarmes'].columns):
+                        st.session_state['data_verificada'] = True
+                        if st.session_state['data_verificada']:
+                            st.session_state['current_page'] = 'results_page'
+                            # Forçar a recarga da página
+                            st.rerun()
+                    else:
+                        st.session_state['data_verificada'] = False
+                        st.error("⚠️ Um ou ambos os arquivos não são compatíveis com a análise!")
+                except Exception as e:
+                    st.session_state['data_verificada'] = False
+                    st.error(f"Erro ao ler os arquivos: {e}")
     elif file_nivel_poco or file_historico_alarmes:
         st.warning("⚠️ Por favor, anexe ambos os arquivos para prosseguir.")
+
+# Função da página de resultados
+def results_page():
+    st.title("Resultados da Análise dos Dados")
     
-    # Botão para iniciar a análise (visível apenas quando ambos os arquivos estão carregados)
-    if file_nivel_poco and file_historico_alarmes:
-        # Botão "Análise das Bombas de Drenagem e Esgotamento UHE SJO"
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        if st.button("🔍 Análisar os Dados"):
-            try:
-                # Salvar os arquivos no estado da sessão
-                st.session_state['file_nivel_poco'] = file_nivel_poco
-                st.session_state['file_historico_alarmes'] = file_historico_alarmes
-                st.session_state['page'] = 'analysis'
-                st.rerun()
-            except Exception as e:
-                st.error(f"Erro inesperado ao processar os arquivos: {e}")
-
-# Página de análise dos dados
-def analysis_page():
-    st.title("📈 Resultados da Análise de Dados")
+    # Cabeçalho visual para a página de resultados
+    st.markdown("""
+    <div style="background-color: #28a745; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        <h2 style="color: white; text-align: center;">📈 Análise Completa</h2>
+        <p style="color: #e2f5e9; text-align: center;">Os resultados detalhados dos dados carregados estão disponíveis abaixo.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Verificar se os arquivos foram carregados
-    if 'file_nivel_poco' not in st.session_state or 'file_historico_alarmes' not in st.session_state:
-        st.warning("Por favor, volte para a página de upload e anexe ambos os arquivos.")
-        return
+    # Divisor estilizado
+    st.markdown("---")
+    if st.button("Voltar à Página Principal"):
+        st.session_state['current_page'] = 'upload_page'
+        st.rerun()  # Recarrega a página para mostrar a página principal
 
-    file1 = st.session_state['file_nivel_poco']
-    file2 = st.session_state['file_historico_alarmes']
-    
-    try:
-        # Ler os arquivos
-        if file1.name.endswith('.csv'):
-            df1 = pd.read_csv(file1)
-        else:
-            df1 = pd.read_excel(file1)
-        
-        if file2.name.endswith('.csv'):
-            df2 = pd.read_csv(file2)
-        else:
-            df2 = pd.read_excel(file2)
-        
-        # Verificar se ambos os arquivos contêm dados
-        if df1.empty or df2.empty:
-            st.warning("Um ou ambos os arquivos estão vazios ou mal formatados.")
-            return
+# Controle de navegação e login
+if 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False
 
-        # Concatenar os dataframes
-        combined_df = pd.concat([df1, df2], axis=0)
+# Verificar se o usuário está logado
+if not st.session_state['logged_in']:
+    login_page()
+else:
+    # Verificar qual página exibir
+    if st.session_state['current_page'] == 'upload_page':
+        upload_page()
+    elif st.session_state['current_page'] == 'results_page':
+        results_page()
 
-        # Filtrar colunas numéricas
-        df_numeric = combined_df.select_dtypes(include=['number'])
-
-        if df_numeric.empty:
-            st.warning("Os arquivos não contêm colunas numéricas para análise.")
-            return
-
-        # Dashboard com Plotly
-        st.subheader("📊 Dashboard de Análise")
-
-        # Exibir algumas estatísticas básicas
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Número de Linhas", combined_df.shape[0])
-        col2.metric("Número de Colunas", combined_df.shape[1])
-        col3.metric("Colunas Numéricas", df_numeric.shape[1])
-
-        # Gráficos com Plotly (comentados)
-        # st.subheader("Gráficos Interativos")
-
-        # # Gráfico de linhas - Exemplo com as duas primeiras colunas numéricas
-        # if df_numeric.shape[1] >= 2:
-        #     line_fig = px.line(df_numeric, x=df_numeric.index, y=df_numeric.columns[:2],
-        #                        title="Gráfico de Linhas",
-        #                        labels={"index": "Índice", "value": "Valor"},
-        #                        template="plotly_dark")
-        #     st.plotly_chart(line_fig)
-
-        # # Gráfico de dispersão
-        # if df_numeric.shape[1] >= 2:
-        #     scatter_fig = px.scatter(df_numeric, x=df_numeric.columns[0], y=df_numeric.columns[1],
-        #                              title="Gráfico de Dispersão",
-        #                              labels={df_numeric.columns[0]: "Eixo X", df_numeric.columns[1]: "Eixo Y"},
-        #                              template="plotly_dark")
-        #     st.plotly_chart(scatter_fig)
-
-        # # Gráfico de barras
-        # bar_fig = px.bar(df_numeric, x=df_numeric.index, y=df_numeric.columns[0],
-        #                  title="Gráfico de Barras",
-        #                  labels={"index": "Índice", df_numeric.columns[0]: df_numeric.columns[0]},
-        #                  template="plotly_dark")
-        # st.plotly_chart(bar_fig)
-    
-    except Exception as e:
-        st.error(f"Erro durante a análise dos dados: {e}")
-
-    # Adicionar funcionalidade ao botão "Voltar para a Página Principal"
-    if st.button("Voltar para a Página Principal"):
-        st.session_state['page'] = 'upload'
+# Colocar o botão de logout no final de todas as páginas
+st.markdown("<hr>", unsafe_allow_html=True)
+if st.session_state.get('logged_in', False):
+    if st.button("Logout"):
+        st.session_state['logged_in'] = False
+        st.session_state['current_page'] = 'login'
         st.rerun()
-
-# Verificar qual página exibir
-if 'page' not in st.session_state:
-    st.session_state['page'] = 'upload'
-
-if st.session_state['page'] == 'upload':
-    upload_page()
-elif st.session_state['page'] == 'analysis':
-    analysis_page()
 
 # Configuração de cores e estilo
 st.markdown("""
