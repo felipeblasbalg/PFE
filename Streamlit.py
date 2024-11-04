@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # Configuração da página
-st.set_page_config(page_title="Análise de Dados", layout="wide")
+#st.set_page_config(page_title="Análise de Dados", layout="wide")
 image1 = "logoInsper3.png"
 image2 = "logoAlupar.png"
 
