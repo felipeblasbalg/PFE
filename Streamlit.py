@@ -86,7 +86,8 @@ def upload_page():
                        set(colunas_historico_alarmes).issubset(st.session_state['df_historico_alarmes'].columns):
                         
                         # análise de dados real
-                        st.session_state["proxima_falha"] = analysis_object.predict(st.session_state["df_nivel_poco"], st.session_state["df_historico_alarmes"])
+                        analysis_object.preprocess(st.session_state["df_nivel_poco"], st.session_state["df_historico_alarmes"])
+                        st.session_state["proxima_falha"] = analysis_object.predict()
 
                         st.session_state['data_verificada'] = True
                         if st.session_state['data_verificada']:
