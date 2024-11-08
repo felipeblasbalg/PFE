@@ -84,6 +84,15 @@ class Analysis:
             # se for evento de acionamento de qualquer uma das bombas e o nível da água estiver acima do nível de acionamento
             if row["AlarmSourceName"] in ["SJ40AD_BOAD5_LG", "SJ40AD_BOAD6_LG"]:
                 activation_times_to_levels[row["InTime"]] = row["InLevel"]
+        
+        # atualiza o tipo da variável de início e fim do ciclo
+        self.df_cycles["StartTime"] = pd.to_datetime(self.df_cycles["StartTime"])
+        self.df_cycles["EndTime"] = pd.to_datetime(self.df_cycles["EndTime"])
+
+        # se não houverem ciclos o suficiente, gera um erro
+        if len(self.df_cycles) <= 1: raise ValueError("sem nenhum ciclo de operação completo")
+
+        print(self.df_cycles)
 
     def predict(self):
         return 0
