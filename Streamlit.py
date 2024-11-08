@@ -6,7 +6,6 @@ from analysis import Analysis
 st.set_page_config(page_title="Análise de Dados", layout="wide")
 image1 = "logoInsper3.png"
 image2 = "logoAlupar.png"
-analysis_object = Analysis()
 
 # Criar três colunas: uma vazia para empurrar as imagens para o canto direito
 col1, col2, col3 = st.columns([6, 0.7, 0.5])  # Ajuste as proporções conforme necessário
@@ -86,7 +85,9 @@ def upload_page():
                        set(colunas_historico_alarmes).issubset(st.session_state['df_historico_alarmes'].columns):
                         
                         # análise de dados real
-                        analysis_object.preprocess(st.session_state["df_nivel_poco"], st.session_state["df_historico_alarmes"])
+                        analysis_object = Analysis(st.session_state["df_nivel_poco"], st.session_state["df_historico_alarmes"])
+                        analysis_object.preprocess()
+                        analysis_object.split_cycles()
                         st.session_state["proxima_falha"] = analysis_object.predict()
 
                         st.session_state['data_verificada'] = True

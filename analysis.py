@@ -2,14 +2,13 @@ import pandas as pd
 
 class Analysis:
 
-    def __init__(self):
-        pass
-
-    def preprocess(self, df_levels, df_alarms):
+    def __init__(self, df_levels, df_alarms):
 
         # amarra os dfs originais ao objeto
         self.df_levels_original = df_levels
         self.df_alarms_original = df_alarms
+
+    def preprocess(self):
 
         # cria os dfs a serem manipulados
         self.df_levels = self.df_levels_original.copy()
@@ -28,10 +27,13 @@ class Analysis:
         self.df_alarms = self.df_alarms[self.df_alarms["ConditionActive"] == 0]
         self.df_alarms = self.df_alarms[self.df_alarms["InTime"] >= self.df_levels["Data"].min()]
 
-        # verifica o momento da última falha
-        self.last_error = self.df_alarms[self.df_alarms["AlarmSourceName"].isin(["SJ40AD_BOAD5_DF", "SJ40AD_BOAD6_DF"])]["EventTime"].max()
-        print(self.last_error)
+        # verifica o momento da última falha e esquece tudo que vem antes
+        last_error = self.df_alarms[self.df_alarms["AlarmSourceName"].isin(["SJ40AD_BOAD5_DF", "SJ40AD_BOAD6_DF"])]["EventTime"].max()
+        self.df_levels = self.df_levels[self.df_levels["Data"] > last_error]
+        self.df_alarms = self.df_alarms[self.df_alarms["EventTime"] > last_error]
+
+    def split_cycles(self):
+        pass
 
     def predict(self):
-
         return 0
