@@ -1,10 +1,12 @@
 import streamlit as st
 import pandas as pd
+from analysis import Analysis
 
-# Configuração da página
+# Configuração da página e inicialização do objeto de análise
 st.set_page_config(page_title="Análise de Dados", layout="wide")
 image1 = "logoInsper3.png"
 image2 = "logoAlupar.png"
+analysis_object = Analysis()
 
 # Criar três colunas: uma vazia para empurrar as imagens para o canto direito
 col1, col2, col3 = st.columns([6, 0.7, 0.5])  # Ajuste as proporções conforme necessário
@@ -82,6 +84,10 @@ def upload_page():
 
                     if set(colunas_nivel_poco).issubset(st.session_state['df_nivel_poco'].columns) and \
                        set(colunas_historico_alarmes).issubset(st.session_state['df_historico_alarmes'].columns):
+                        
+                        # análise de dados real
+                        st.session_state["proxima_falha"] = analysis_object.predict(st.session_state["df_nivel_poco"], st.session_state["df_historico_alarmes"])
+
                         st.session_state['data_verificada'] = True
                         if st.session_state['data_verificada']:
                             st.session_state['current_page'] = 'results_page'
@@ -110,6 +116,7 @@ def results_page():
     
     # Divisor estilizado
     st.markdown("---")
+    st.markdown("%d" % st.session_state["proxima_falha"], unsafe_allow_html=True)
     if st.button("Voltar à Página Principal"):
         st.session_state['current_page'] = 'upload_page'
         st.rerun()  # Recarrega a página para mostrar a página principal
