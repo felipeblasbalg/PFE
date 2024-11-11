@@ -136,6 +136,26 @@ def results_page():
     st.markdown("---")
     st.markdown("De acordo com o modelo, a próxima falha ocorrerá em %d ciclos." % st.session_state["proxima_falha_ciclos"], unsafe_allow_html=True)
     st.markdown("Isso deve ocorrer em, aproximadamente %d dias e %d horas" % (days, hours), unsafe_allow_html=True)
+    
+    # --- Gráfico dos últimos 30 pontos de previsão ---
+    num_pontos = 30
+    historical_predictions = []
+    for i in range(num_pontos):
+        historical_prediction = analysis_object.predict()
+        historical_predictions.append(historical_prediction[0][0])
+
+    # Criação do DataFrame e do gráfico
+    df = pd.DataFrame({
+        "Tempo (Ponto)": list(range(len(historical_predictions))),
+        "Previsão número de ciclos até a falha": historical_predictions
+    })
+
+    fig = px.line(df, x="Tempo (Ponto)", y="Previsão número de ciclos até a falha", title="Previsões de Ciclos até a Falha - Últimos 30 Pontos")
+    fig.update_layout(xaxis_title="Tempo", yaxis_title="Previsão número de ciclos até a falha")
+    
+    st.plotly_chart(fig)
+    ##########
+    
     if st.button("Voltar à Página Principal"):
         st.session_state['current_page'] = 'upload_page'
         st.rerun()  # Recarrega a página para mostrar a página principal
