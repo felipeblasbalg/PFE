@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 from analysis import Analysis
 
 # Configuração da página e inicialização do objeto de análise
@@ -74,7 +75,6 @@ def upload_page():
                     st.session_state['df_nivel_poco'] = pd.read_csv(file_nivel_poco) if file_nivel_poco.name.endswith('.csv') else pd.read_excel(file_nivel_poco)
                     st.session_state['df_historico_alarmes'] = pd.read_csv(file_historico_alarmes) if file_historico_alarmes.name.endswith('.csv') else pd.read_excel(file_historico_alarmes)
 
-                    # Verificar as colunas esperadas
                     colunas_nivel_poco = ["TAG", "Data", "Valor"]
                     colunas_historico_alarmes = ["E3TimeStamp", "Acked", "Area", "ActorID", "ConditionActive", "EventType",
                                                  "Message", "Severity", "InTime", "OutTime", "AckTime", 
@@ -84,32 +84,26 @@ def upload_page():
                     if set(colunas_nivel_poco).issubset(st.session_state['df_nivel_poco'].columns) and \
                        set(colunas_historico_alarmes).issubset(st.session_state['df_historico_alarmes'].columns):
                         
-                        # análise de dados real
+                        # Inicialização e análise dos dados
                         analysis_object = Analysis(st.session_state["df_nivel_poco"], st.session_state["df_historico_alarmes"])
-                        print("Inicialização da análise                 OK")
                         analysis_object.preprocess()
-                        print("Preprocessamento dos dados               OK")
                         analysis_object.split_cycles()
-                        print("Formatação dos dados para a predição     OK")
                         analysis_object.format()
-                        print("Predição                                 OK")
                         prediction = analysis_object.predict()
                         st.session_state["previsoes_ultimos_ciclos"] = prediction[0]
                         st.session_state["proxima_falha_ciclos"] = prediction[0][-1]
                         st.session_state["proxima_falha_segundos"] = prediction[1] * prediction[0][-1]
 
-                        print(st.session_state["previsoes_ultimos_ciclos"])
+                        # Armazenar o objeto de análise no session_state
+                        st.session_state['analysis_object'] = analysis_object
 
                         st.session_state['data_verificada'] = True
                         if st.session_state['data_verificada']:
                             st.session_state['current_page'] = 'results_page'
-                            # Forçar a recarga da página
                             st.rerun()
                     else:
-                        st.session_state['data_verificada'] = False
                         st.error("⚠️ Um ou ambos os arquivos não são compatíveis com a análise!")
                 except Exception as e:
-                    st.session_state['data_verificada'] = False
                     st.error(f"Erro ao ler os arquivos: {e}")
     elif file_nivel_poco or file_historico_alarmes:
         st.warning("⚠️ Por favor, anexe ambos os arquivos para prosseguir.")
@@ -126,13 +120,11 @@ def results_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # calcula quantos em quantos dias e horas a falha deve ocorrer
     seconds = st.session_state["proxima_falha_segundos"]
     days = seconds // (24 * 60 * 60)
     seconds = seconds % (24 * 60 * 60)
     hours = round(seconds / (60 * 60))
     
-    # Divisor estilizado
     st.markdown("---")
     st.markdown("De acordo com o modelo, a próxima falha ocorrerá em %d ciclos." % st.session_state["proxima_falha_ciclos"], unsafe_allow_html=True)
     st.markdown("Isso deve ocorrer em, aproximadamente %d dias e %d horas" % (days, hours), unsafe_allow_html=True)
@@ -140,6 +132,10 @@ def results_page():
     # --- Gráfico dos últimos 30 pontos de previsão ---
     num_pontos = 30
     historical_predictions = []
+    
+    # Acessar o objeto de análise armazenado no session_state
+    analysis_object = st.session_state['analysis_object']
+    
     for i in range(num_pontos):
         historical_prediction = analysis_object.predict()
         historical_predictions.append(historical_prediction[0][0])
