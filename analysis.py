@@ -1,9 +1,9 @@
+import json
 import numpy      as np
 import pandas     as pd
 import tensorflow as tf
 
 class Analysis:
-
 
     def __init__(self, df_levels, df_alarms):
 
@@ -21,6 +21,11 @@ class Analysis:
 
         # cria o dataframe de referência
         self.df_reference = Analysis.make_df_reference(df_levels, df_alarms)
+
+        # importa o modelo e variáveis necessárias
+        self.model = tf.keras.models.load_model("model/model.keras")
+        with open("model/variables.json", "r") as file:
+            self.variables = json.load(file)
 
 
     def preprocess(self):
@@ -146,7 +151,14 @@ class Analysis:
         print(np.isnan(X).any())
         print(X.shape)
 
-        return 0
+        # faz as predições
+        predictions = self.model.predict(X)
+        
+        # analisa as predições
+        predictions = np.squeeze(predictions)
+        predictions = predictions * self.variables["max_cycles_without_error"]
+
+        return predictions[-1] + 1
 
 
     @staticmethod

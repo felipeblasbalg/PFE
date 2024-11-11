@@ -123,7 +123,7 @@ def results_page():
     
     # Divisor estilizado
     st.markdown("---")
-    st.markdown("%d" % st.session_state["proxima_falha"], unsafe_allow_html=True)
+    st.markdown("De acordo com o modelo, a próxima falha ocorrerá em %d ciclos." % st.session_state["proxima_falha"], unsafe_allow_html=True)
     if st.button("Voltar à Página Principal"):
         st.session_state['current_page'] = 'upload_page'
         st.rerun()  # Recarrega a página para mostrar a página principal
