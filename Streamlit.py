@@ -95,8 +95,8 @@ def upload_page():
                         print("Predição                                 OK")
                         prediction = analysis_object.predict()
                         st.session_state["previsoes_ultimos_ciclos"] = prediction[0]
-                        st.session_state["proxima_falha_ciclos"] = prediction[0][0]
-                        st.session_state["proxima_falha_segundos"] = prediction[1] * prediction[0][0]
+                        st.session_state["proxima_falha_ciclos"] = prediction[0][-1]
+                        st.session_state["proxima_falha_segundos"] = prediction[1] * prediction[0][-1]
 
                         print(st.session_state["previsoes_ultimos_ciclos"])
 
