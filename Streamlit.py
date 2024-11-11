@@ -9,7 +9,7 @@ image1 = "logoInsper3.png"
 image2 = "logoAlupar.png"
 
 # Criar três colunas: uma vazia para empurrar as imagens para o canto direito
-col1, col2, col3 = st.columns([6, 0.7, 0.5])  # Ajuste as proporções conforme necessário
+col1, col2, col3 = st.columns([6, 0.7, 0.5])
 
 # Deixar a primeira coluna vazia para alinhamento
 with col1:
@@ -24,7 +24,7 @@ with col3:
 
 # Dados de login (em um sistema real, estas informações deveriam estar em um banco de dados seguro)
 user_credentials = {
-    "admin": "senha",  # Exemplo de credencial
+    "admin": "senha",
     "operador1": "alupar"
 }
 
@@ -150,7 +150,6 @@ def results_page():
     fig.update_layout(xaxis_title="Tempo", yaxis_title="Previsão número de ciclos até a falha")
     
     st.plotly_chart(fig)
-    ##########
     
     if st.button("Voltar à Página Principal"):
         st.session_state['current_page'] = 'upload_page'
@@ -160,11 +159,9 @@ def results_page():
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-# Verificar se o usuário está logado
 if not st.session_state['logged_in']:
     login_page()
 else:
-    # Verificar qual página exibir
     if st.session_state['current_page'] == 'upload_page':
         upload_page()
     elif st.session_state['current_page'] == 'results_page':
