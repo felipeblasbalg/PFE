@@ -94,8 +94,11 @@ def upload_page():
                         analysis_object.format()
                         print("Predição                                 OK")
                         prediction = analysis_object.predict()
-                        st.session_state["proxima_falha_ciclos"] = prediction[0]
-                        st.session_state["proxima_falha_segundos"] = prediction[1]
+                        st.session_state["previsoes_ultimos_ciclos"] = prediction[0]
+                        st.session_state["proxima_falha_ciclos"] = prediction[0][0]
+                        st.session_state["proxima_falha_segundos"] = prediction[1] * prediction[0][0]
+
+                        print(st.session_state["previsoes_ultimos_ciclos"])
 
                         st.session_state['data_verificada'] = True
                         if st.session_state['data_verificada']:
