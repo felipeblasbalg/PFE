@@ -126,6 +126,15 @@ class Analysis:
         self.df_levels["DerivadaPadronizada"] = (self.df_levels["Derivada"] - self.df_levels["Derivada"].mean()) / self.df_levels["Derivada"].std()
         self.df_levels = self.df_levels.dropna()
 
+        # cria o array das derivadas padronizadas dos ciclos
+        self.cycles_array = list()
+        for index, row in self.df_cycles.iterrows():
+            df_cycle_levels = self.df_levels[self.df_levels["Data"] >= row["StartTime"]]
+            df_cycle_levels = df_cycle_levels[df_cycle_levels["Data"] < row["EndTime"]]
+            df_cycle_levels.sort_values(by="Data")
+            levels_diff_list = list(df_cycle_levels["DerivadaPadronizada"])
+            self.cycles_array.append(levels_diff_list)
+
 
     def predict(self):
         return 0
