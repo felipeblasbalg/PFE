@@ -38,11 +38,24 @@ class Analysis:
         self.df_alarms = self.df_alarms.drop(columns=["E3TimeStamp", "Area", "Severity", "Quality", "ActorID", "FullAlarmSourceName", "InTimeMS", "FormattedValue"])
         self.df_alarms = self.df_alarms[self.df_alarms["ConditionActive"] == 0]
         self.df_alarms = self.df_alarms[self.df_alarms["InTime"] >= self.df_levels["Data"].min()]
+        self.df_levels = self.df_levels[self.df_levels["Data"] >= self.df_alarms["InTime"].min()]
+
+        print("!@#$%@#$%@#$%@#$%@$%@#$%@#$")
+        print(self.df_alarms)
+        print(self.df_levels)
 
         # verifica o momento da última falha e esquece tudo que vem antes
         last_error = self.df_alarms[self.df_alarms["AlarmSourceName"].isin(["SJ40AD_BOAD5_DF", "SJ40AD_BOAD6_DF"])]["EventTime"].max()
+        if pd.isna(last_error): last_error = pd.to_datetime("01/01/2000")
+        print(last_error)
         self.df_levels = self.df_levels[self.df_levels["Data"] > last_error]
         self.df_alarms = self.df_alarms[self.df_alarms["EventTime"] > last_error]
+
+        print("!@#$%@#$%@#$%@#$%@$%@#$%@#$")
+        print(self.df_alarms)
+        print(self.df_levels)
+
+        if len(self.df_alarms) == 0 or len(self.df_levels) == 0: raise ValueError("sem dados suficientes")
 
 
     def split_cycles(self):
@@ -58,12 +71,21 @@ class Analysis:
         # definição do dataframe dos ciclos
         self.df_cycles = pd.DataFrame({"Cycle": [], "StartTime": [], "EndTime": []})
 
+        print(self.df_alarms)
+
         # definição dos valores iniciais
+        c = 0
+        print(c); c+=1
         current_cycle = 0
+        print(c); c+=1
         self.df_cycles.loc[0, "Cycle"] = 0
+        print(c); c+=1
         self.df_cycles.loc[0, "StartTime"] = self.df_alarms["InTime"].min()
+        print(c); c+=1
         self.df_cycles.loc[0, "StartLevel"] = self.df_alarms.loc[self.df_alarms["InTime"].idxmin(), "InLevel"]
+        print(c); c+=1
         activation_times_to_levels = dict()
+        print(c); c+=1
 
         # loop de coleta dos ciclos
         for index, row in self.df_alarms.iterrows():
@@ -121,7 +143,8 @@ class Analysis:
         q1 = self.df_cycles["Len"].quantile(0.05)
         self.df_cycles = self.df_cycles[self.df_cycles["Len"] > q1][self.df_cycles["Len"] < q2]
 
-        print(self.df_cycles)
+        # se não houverem ciclos o suficiente, gera um erro
+        if len(self.df_cycles) <= 2: raise ValueError("sem nenhum ciclo de operação completo")
 
 
     def format(self):
@@ -148,8 +171,6 @@ class Analysis:
         # faz o preenchimento de zeros e aumenta a dimensão do array
         X = tf.keras.preprocessing.sequence.pad_sequences(self.cycles_array, dtype="float32", padding="post", maxlen=self.df_cycles["Len"].max())
         X = np.expand_dims(X, axis=-1)
-        print(np.isnan(X).any())
-        print(X.shape)
 
         # faz as predições
         predictions = self.model.predict(X)
@@ -159,7 +180,7 @@ class Analysis:
         predictions = predictions * self.variables["max_cycles_without_error"]
         next_error = predictions[-1] + 1
 
-        return next_error, self.variables["average_cycle_duration"] * next_error
+        return round(next_error), self.variables["average_cycle_duration"] * next_error
 
 
     @staticmethod
