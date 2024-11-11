@@ -86,8 +86,13 @@ def upload_page():
                         
                         # análise de dados real
                         analysis_object = Analysis(st.session_state["df_nivel_poco"], st.session_state["df_historico_alarmes"])
+                        print("Inicialização da análise                 OK")
                         analysis_object.preprocess()
+                        print("Preprocessamento dos dados               OK")
                         analysis_object.split_cycles()
+                        print("Formatação dos dados para a predição     OK")
+                        analysis_object.format()
+                        print("Predição                                 OK")
                         st.session_state["proxima_falha"] = analysis_object.predict()
 
                         st.session_state['data_verificada'] = True

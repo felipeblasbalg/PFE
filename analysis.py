@@ -2,6 +2,7 @@ import pandas as pd
 
 class Analysis:
 
+
     def __init__(self, df_levels, df_alarms):
 
         # amarra os dfs originais ao objeto
@@ -19,6 +20,7 @@ class Analysis:
         # cria o dataframe de referência
         self.df_reference = Analysis.make_df_reference(df_levels, df_alarms)
 
+
     def preprocess(self):
 
         # cria os dfs a serem manipulados
@@ -34,6 +36,7 @@ class Analysis:
         last_error = self.df_alarms[self.df_alarms["AlarmSourceName"].isin(["SJ40AD_BOAD5_DF", "SJ40AD_BOAD6_DF"])]["EventTime"].max()
         self.df_levels = self.df_levels[self.df_levels["Data"] > last_error]
         self.df_alarms = self.df_alarms[self.df_alarms["EventTime"] > last_error]
+
 
     def split_cycles(self):
         
@@ -90,13 +93,44 @@ class Analysis:
         self.df_cycles["EndTime"] = pd.to_datetime(self.df_cycles["EndTime"])
 
         # se não houverem ciclos o suficiente, gera um erro
-        if len(self.df_cycles) <= 1: raise ValueError("sem nenhum ciclo de operação completo")
+        if len(self.df_cycles) <= 2: raise ValueError("sem nenhum ciclo de operação completo")
+
+        # remove o primeiro e o último ciclo
+        self.df_cycles = self.df_cycles[self.df_cycles["Cycle"] != 0]
+        self.df_cycles = self.df_cycles[self.df_cycles["Cycle"] != self.df_cycles["Cycle"].max()]
+
+        # define o tamanho dos ciclos
+        cycle_sizes = list()
+        for index, row in self.df_cycles.iterrows():
+            df_cycle_levels = self.df_levels[self.df_levels["Data"] >= row["StartTime"]]
+            df_cycle_levels = df_cycle_levels[df_cycle_levels["Data"] < row["EndTime"]]
+            df_cycle_levels.sort_values(by="Data")
+            levels_diff_list = list(df_cycle_levels["Valor"])
+            cycle_sizes.append(len(levels_diff_list))
+        self.df_cycles["Len"] = cycle_sizes
+
+        # filtra o ciclos muito compridos e muito curtos
+        q2 = self.df_cycles["Len"].quantile(1.00)
+        q1 = self.df_cycles["Len"].quantile(0.05)
+        self.df_cycles = self.df_cycles[self.df_cycles["Len"] > q1][self.df_cycles["Len"] < q2]
 
         print(self.df_cycles)
 
+
+    def format(self):
+
+        # cria a coluna da derivada discreta padronizada do nível do poço
+        self.df_levels["DifValor"] = self.df_levels["Valor"].diff()
+        self.df_levels["DifTempo"] = self.df_levels["Data"].diff().dt.total_seconds()
+        self.df_levels["Derivada"] = self.df_levels["DifValor"] / self.df_levels["DifTempo"]
+        self.df_levels["DerivadaPadronizada"] = (self.df_levels["Derivada"] - self.df_levels["Derivada"].mean()) / self.df_levels["Derivada"].std()
+        self.df_levels = self.df_levels.dropna()
+
+
     def predict(self):
         return 0
-    
+
+
     @staticmethod
     # função que retorna o nível da água em determinado momento
     def get_water_level(df_levels, date: pd.Timestamp):
