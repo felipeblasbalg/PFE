@@ -17,5 +17,5 @@ pip install -r requirments.txt
 Em um terminal, no diretório (pasta) do programa, entre o comando
 
 ``` bash
-streamlit run app.py
+streamlit run Streamlit.py
 ```
