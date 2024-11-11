@@ -93,7 +93,9 @@ def upload_page():
                         print("Formatação dos dados para a predição     OK")
                         analysis_object.format()
                         print("Predição                                 OK")
-                        st.session_state["proxima_falha"] = analysis_object.predict()
+                        prediction = analysis_object.predict()
+                        st.session_state["proxima_falha_ciclos"] = prediction[0]
+                        st.session_state["proxima_falha_segundos"] = prediction[1]
 
                         st.session_state['data_verificada'] = True
                         if st.session_state['data_verificada']:
@@ -120,10 +122,17 @@ def results_page():
         <p style="color: #e2f5e9; text-align: center;">Os resultados detalhados dos dados carregados estão disponíveis abaixo.</p>
     </div>
     """, unsafe_allow_html=True)
+
+    # calcula quantos em quantos dias e horas a falha deve ocorrer
+    seconds = st.session_state["proxima_falha_segundos"]
+    days = seconds // (24 * 60 * 60)
+    seconds = seconds % (24 * 60 * 60)
+    hours = round(seconds / (60 * 60))
     
     # Divisor estilizado
     st.markdown("---")
-    st.markdown("De acordo com o modelo, a próxima falha ocorrerá em %d ciclos." % st.session_state["proxima_falha"], unsafe_allow_html=True)
+    st.markdown("De acordo com o modelo, a próxima falha ocorrerá em %d ciclos." % st.session_state["proxima_falha_ciclos"], unsafe_allow_html=True)
+    st.markdown("Isso deve ocorrer em, aproximadamente %d dias e %d horas" % (days, hours), unsafe_allow_html=True)
     if st.button("Voltar à Página Principal"):
         st.session_state['current_page'] = 'upload_page'
         st.rerun()  # Recarrega a página para mostrar a página principal

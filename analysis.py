@@ -157,8 +157,9 @@ class Analysis:
         # analisa as predições
         predictions = np.squeeze(predictions)
         predictions = predictions * self.variables["max_cycles_without_error"]
+        next_error = predictions[-1] + 1
 
-        return predictions[-1] + 1
+        return next_error, self.variables["average_cycle_duration"] * next_error
 
 
     @staticmethod
