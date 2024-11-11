@@ -1,4 +1,6 @@
-import pandas as pd
+import numpy      as np
+import pandas     as pd
+import tensorflow as tf
 
 class Analysis:
 
@@ -128,7 +130,7 @@ class Analysis:
 
         # cria o array das derivadas padronizadas dos ciclos
         self.cycles_array = list()
-        for index, row in self.df_cycles.iterrows():
+        for _, row in self.df_cycles.iterrows():
             df_cycle_levels = self.df_levels[self.df_levels["Data"] >= row["StartTime"]]
             df_cycle_levels = df_cycle_levels[df_cycle_levels["Data"] < row["EndTime"]]
             df_cycle_levels.sort_values(by="Data")
@@ -137,6 +139,13 @@ class Analysis:
 
 
     def predict(self):
+        
+        # faz o preenchimento de zeros e aumenta a dimensão do array
+        X = tf.keras.preprocessing.sequence.pad_sequences(self.cycles_array, dtype="float32", padding="post", maxlen=self.df_cycles["Len"].max())
+        X = np.expand_dims(X, axis=-1)
+        print(np.isnan(X).any())
+        print(X.shape)
+
         return 0
 
 
