@@ -128,15 +128,15 @@ def results_page():
 
     # calcula quantos em quantos dias e horas a falha deve ocorrer
     seconds = st.session_state["proxima_falha_segundos"]
-    days = seconds // (24 * 60 * 60)
+    days = int(seconds // (24 * 60 * 60))
     seconds = seconds % (24 * 60 * 60)
     hours = round(seconds / (60 * 60))
     
-# Obtendo a previsão de ciclos até a falha
+    # Obtendo a previsão de ciclos até a falha
     proxima_falha_ciclos = int(st.session_state["proxima_falha_ciclos"])  # Ignorando casas decimais
-
-
-# Estilos para as mensagens
+    
+    
+    # Estilos para as mensagens
     if proxima_falha_ciclos <= 5:
         cor_fundo = "#f8d7da"  # Vermelho claro para alerta
         cor_texto = "#721c24"  # Vermelho escuro
@@ -152,7 +152,7 @@ def results_page():
         cor_texto = "#155724"  # Verde escuro
         icone = "✅"
         mensagem = f"A bomba está funcionando com segurança, próxima falha em {proxima_falha_ciclos} ciclos."
-
+    
     # Exibindo a previsão de falha e tempo estimado com a nomenclatura solicitada
     st.markdown("---")
     st.markdown(f"<h3 style='color:{cor_texto}; text-align: center; font-family: Arial, sans-serif;'>{icone} {mensagem}</h3>", unsafe_allow_html=True)
@@ -162,7 +162,7 @@ def results_page():
     st.markdown(f"""
         <div style="display: flex; justify-content: center; gap: 20px;">
             <div style="background-color: #000000; color: #ffffff; font-size: 40px; font-weight: bold; padding: 20px; width: 150px; border-radius: 10px; text-align: center;">
-                {proxima_falha_ciclos}
+                {proxima_falha_ciclos} ciclos
             </div>
             <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 20px; width: 150px; border-radius: 10px; text-align: center;">
                 {days}d {hours}h
@@ -172,6 +172,7 @@ def results_page():
     
     # Adicionando um divisor visual
     st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
+
     
     
 
