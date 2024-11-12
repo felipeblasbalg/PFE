@@ -163,7 +163,7 @@ def results_page():
     # Adicionando a sentença "Falha prevista para" alinhada com os visores
     st.markdown(f"""
         <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; color: {cor_texto};">
-            <span>Falha prevista para</span>
+            <span>Falha prevista para:</span>
             <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
                 {proxima_falha_ciclos} ciclos
             </div>
