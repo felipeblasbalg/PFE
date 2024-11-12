@@ -132,9 +132,9 @@ def results_page():
     seconds = seconds % (24 * 60 * 60)
     hours = round(seconds / (60 * 60))
     
+
     # Obtendo a previsão de ciclos até a falha
     proxima_falha_ciclos = int(st.session_state["proxima_falha_ciclos"])  # Ignorando casas decimais
-    
     
     # Estilos para as mensagens
     if proxima_falha_ciclos <= 5:
@@ -161,10 +161,13 @@ def results_page():
     # Visor para o número da previsão (ciclos) e o tempo (dias e horas)
     st.markdown(f"""
         <div style="display: flex; justify-content: center; gap: 20px;">
-            <div style="background-color: #000000; color: #ffffff; font-size: 40px; font-weight: bold; padding: 20px; width: 150px; border-radius: 10px; text-align: center;">
-                {proxima_falha_ciclos} ciclos
+            <!-- Visor de Ciclos -->
+            <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 15px; width: 180px; border-radius: 10px; text-align: center;">
+                {proxima_falha_ciclos} <span style="font-size: 20px;">ciclos</span>
             </div>
-            <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 20px; width: 150px; border-radius: 10px; text-align: center;">
+            
+            <!-- Visor de Dias e Horas -->
+            <div style="background-color: #000000; color: #ffffff; font-size: 25px; font-weight: bold; padding: 15px; width: 180px; border-radius: 10px; text-align: center;">
                 {days}d {hours}h
             </div>
         </div>
@@ -172,9 +175,9 @@ def results_page():
     
     # Adicionando um divisor visual
     st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
-
     
-    
+        
+        
 
 
     if st.button("Voltar à Página Principal"):
