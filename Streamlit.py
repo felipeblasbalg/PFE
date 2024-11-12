@@ -131,8 +131,9 @@ def results_page():
     days = seconds // (24 * 60 * 60)
     seconds = seconds % (24 * 60 * 60)
     hours = round(seconds / (60 * 60))
-
-
+    
+# Obtendo a previsão de ciclos até a falha
+proxima_falha_ciclos = st.session_state["proxima_falha_ciclos"]
 
 # Estilos para as mensagens
     if proxima_falha_ciclos <= 5:
