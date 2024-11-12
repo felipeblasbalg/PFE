@@ -94,10 +94,17 @@ def upload_page():
                         st.session_state["proxima_falha_ciclos"] = prediction[0][-1]
                         st.session_state["proxima_falha_segundos"] = prediction[1] * prediction[0][-1]
 
-                        # Adiciona a previsão à lista das últimas 30 previsões, convertendo para float
-                        st.session_state['ultimas_previsoes'].append(float(prediction[0][-1]))  # Conversão para float
+                        if 'ultimas_previsoes' not in st.session_state:
+                            st.session_state['ultimas_previsoes'] = []
+
+# Adiciona a previsão à lista das últimas 30 previsões, convertendo para float
+                        nova_previsao = float(prediction[0][-1])  # Certificando-se de que é um float
+                        st.session_state['ultimas_previsoes'].append(nova_previsao)
+
+# Mantém no máximo 30 previsões, removendo as mais antigas se necessário
                         if len(st.session_state['ultimas_previsoes']) > 30:
                             st.session_state['ultimas_previsoes'] = st.session_state['ultimas_previsoes'][-30:]
+                    
 
                         st.session_state['data_verificada'] = True
                         if st.session_state['data_verificada']:
