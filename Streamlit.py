@@ -160,9 +160,10 @@ def results_page():
     st.markdown(f"<h3 style='color:{cor_texto}; text-align: center; font-family: Arial, sans-serif;'>{icone} {mensagem}</h3>", unsafe_allow_html=True)
     st.markdown(f"<p style='color:{cor_texto}; text-align: center; font-size: 18px;'>Isso deve ocorrer em, aproximadamente {days} dias e {hours} horas.</p>", unsafe_allow_html=True)
     
-    # Visor para o número da previsão (ciclos) e o tempo (dias e horas)
+    # Adicionando a sentença "Falha prevista para" alinhada com os visores
     st.markdown(f"""
-        <div style="display: flex; justify-content: center; gap: 15px;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; color: {cor_texto};">
+            <span>Falha prevista para</span>
             <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
                 {proxima_falha_ciclos} ciclos
             </div>
@@ -175,9 +176,6 @@ def results_page():
     # Adicionando um divisor visual
     st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
     
-        
-            
-        
 
 
     if st.button("Voltar à Página Principal"):
