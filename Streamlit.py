@@ -8,7 +8,7 @@ image1 = "logoInsper3.png"
 image2 = "logoAlupar.png"
 
 # Criar três colunas: uma vazia para empurrar as imagens para o canto direito
-col1, col2, col3 = st.columns([6, 0.7, 0.5])  # Ajuste as proporções conforme necessário
+col1, col2, col3 = st.columns([6, 0.7, 0.5])
 
 # Deixar a primeira coluna vazia para alinhamento
 with col1:
@@ -23,7 +23,7 @@ with col3:
 
 # Dados de login (em um sistema real, estas informações deveriam estar em um banco de dados seguro)
 user_credentials = {
-    "admin": "senha",  # Exemplo de credencial
+    "admin": "senha",
     "operador1": "alupar"
 }
 
@@ -31,7 +31,6 @@ user_credentials = {
 def login_page():
     st.title("🔐 Login")
     
-    # Criar um formulário para capturar a entrada de usuário e senha
     with st.form("login_form"):
         username = st.text_input("Usuário")
         password = st.text_input("Senha", type="password")
@@ -50,7 +49,6 @@ def login_page():
 def upload_page():
     st.title("📊 Análise de Dados")
     
-    # Personalização do cabeçalho
     st.markdown("""
     <div style="background-color: #1f77b4; padding: 20px; border-radius: 10px;">
         <h1 style="color: white; text-align: center;">Caro Operador, Bem-Vindo!</h1>
@@ -58,23 +56,25 @@ def upload_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Upload dos arquivos separados para Nível do Poço e Histórico de Alarmes
     st.subheader("📂 Anexar Arquivo do Nível do Poço (CSV ou XLSX)")
     file_nivel_poco = st.file_uploader("Anexe o arquivo do Nível do Poço", type=['csv', 'xlsx'], key="nivel_poco")
 
     st.subheader("📂 Anexar Arquivo do Histórico de Alarmes (CSV ou XLSX)")
     file_historico_alarmes = st.file_uploader("Anexe o arquivo do Histórico de Alarmes", type=['csv', 'xlsx'], key="historico_alarmes")
 
+    # Inicializa a lista para armazenar as últimas 30 previsões
+    if 'ultimas_previsoes' not in st.session_state:
+        st.session_state['ultimas_previsoes'] = []
+
     # Mostrar o botão "Verificar Dados" apenas quando ambos os arquivos forem anexados
     if file_nivel_poco and file_historico_alarmes:
         if st.button("Verificar e Analisar Dados"):
             with st.spinner("Verificando e Analisando Dados..."):
                 try:
-                    # Ler os arquivos e armazenar na sessão para não repetir a leitura
+                    # Ler os arquivos e armazenar na sessão
                     st.session_state['df_nivel_poco'] = pd.read_csv(file_nivel_poco) if file_nivel_poco.name.endswith('.csv') else pd.read_excel(file_nivel_poco)
                     st.session_state['df_historico_alarmes'] = pd.read_csv(file_historico_alarmes) if file_historico_alarmes.name.endswith('.csv') else pd.read_excel(file_historico_alarmes)
 
-                    # Verificar as colunas esperadas
                     colunas_nivel_poco = ["TAG", "Data", "Valor"]
                     colunas_historico_alarmes = ["E3TimeStamp", "Acked", "Area", "ActorID", "ConditionActive", "EventType",
                                                  "Message", "Severity", "InTime", "OutTime", "AckTime", 
@@ -84,26 +84,24 @@ def upload_page():
                     if set(colunas_nivel_poco).issubset(st.session_state['df_nivel_poco'].columns) and \
                        set(colunas_historico_alarmes).issubset(st.session_state['df_historico_alarmes'].columns):
                         
-                        # análise de dados real
+                        # Análise e previsões
                         analysis_object = Analysis(st.session_state["df_nivel_poco"], st.session_state["df_historico_alarmes"])
-                        print("Inicialização da análise                 OK")
                         analysis_object.preprocess()
-                        print("Preprocessamento dos dados               OK")
                         analysis_object.split_cycles()
-                        print("Formatação dos dados para a predição     OK")
                         analysis_object.format()
-                        print("Predição                                 OK")
                         prediction = analysis_object.predict()
                         st.session_state["previsoes_ultimos_ciclos"] = prediction[0]
                         st.session_state["proxima_falha_ciclos"] = prediction[0][-1]
                         st.session_state["proxima_falha_segundos"] = prediction[1] * prediction[0][-1]
 
-                        print(st.session_state["previsoes_ultimos_ciclos"])
+                        # Adiciona a previsão na lista de últimas 30 previsões
+                        st.session_state['ultimas_previsoes'].append(prediction[0][-1])
+                        if len(st.session_state['ultimas_previsoes']) > 30:
+                            st.session_state['ultimas_previsoes'] = st.session_state['ultimas_previsoes'][-30:]
 
                         st.session_state['data_verificada'] = True
                         if st.session_state['data_verificada']:
                             st.session_state['current_page'] = 'results_page'
-                            # Forçar a recarga da página
                             st.rerun()
                     else:
                         st.session_state['data_verificada'] = False
@@ -118,7 +116,6 @@ def upload_page():
 def results_page():
     st.title("Resultados da Análise dos Dados")
     
-    # Cabeçalho visual para a página de resultados
     st.markdown("""
     <div style="background-color: #28a745; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
         <h2 style="color: white; text-align: center;">📈 Análise Completa</h2>
@@ -126,16 +123,18 @@ def results_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # calcula quantos em quantos dias e horas a falha deve ocorrer
     seconds = st.session_state["proxima_falha_segundos"]
     days = seconds // (24 * 60 * 60)
     seconds = seconds % (24 * 60 * 60)
     hours = round(seconds / (60 * 60))
     
-    # Divisor estilizado
     st.markdown("---")
     st.markdown("De acordo com o modelo, a próxima falha ocorrerá em %d ciclos." % st.session_state["proxima_falha_ciclos"], unsafe_allow_html=True)
     st.markdown("Isso deve ocorrer em, aproximadamente %d dias e %d horas" % (days, hours), unsafe_allow_html=True)
+    
+    # Exibir a lista das últimas 30 previsões
+    st.write("Últimas 30 Previsões de Ciclos até a Falha:", st.session_state['ultimas_previsoes'])
+
     if st.button("Voltar à Página Principal"):
         st.session_state['current_page'] = 'upload_page'
         st.rerun()  # Recarrega a página para mostrar a página principal
