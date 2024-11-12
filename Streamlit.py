@@ -133,48 +133,47 @@ def results_page():
     hours = round(seconds / (60 * 60))
     
 # Obtendo a previsão de ciclos até a falha
-    proxima_falha_ciclos = st.session_state["proxima_falha_ciclos"]
+    proxima_falha_ciclos = int(st.session_state["proxima_falha_ciclos"])  # Ignorando casas decimais
+
 
 # Estilos para as mensagens
     if proxima_falha_ciclos <= 5:
         cor_fundo = "#f8d7da"  # Vermelho claro para alerta
         cor_texto = "#721c24"  # Vermelho escuro
         icone = "⚠️"
-        mensagem = "Atenção: A próxima falha ocorrerá em %d ciclos, que é muito próximo!" % proxima_falha_ciclos
+        mensagem = f"Atenção: A próxima falha ocorrerá em {proxima_falha_ciclos} ciclos, que é muito próximo!"
     elif 5 < proxima_falha_ciclos <= 10:
         cor_fundo = "#fff3cd"  # Amarelo claro para uma advertência menos crítica
         cor_texto = "#856404"  # Amarelo escuro
         icone = "🛠️"
-        mensagem = "A bomba está funcional, mas a falha está prevista em %d ciclos." % proxima_falha_ciclos
+        mensagem = f"A bomba está funcional, mas a falha está prevista em {proxima_falha_ciclos} ciclos."
     else:
         cor_fundo = "#d4edda"  # Verde claro para indicar que tudo está seguro
         cor_texto = "#155724"  # Verde escuro
         icone = "✅"
-        mensagem = "A bomba está funcionando com segurança, próxima falha em %d ciclos." % proxima_falha_ciclos
+        mensagem = f"A bomba está funcionando com segurança, próxima falha em {proxima_falha_ciclos} ciclos."
 
-# Exibindo a previsão de falha e tempo estimado com a nomenclatura solicitada
+    # Exibindo a previsão de falha e tempo estimado com a nomenclatura solicitada
     st.markdown("---")
-    st.markdown(f"<h3 style='color:{cor_texto}; text-align: center; font-family: Arial, sans-serif;'>{icone} De acordo com o modelo, a próxima falha ocorrerá em {proxima_falha_ciclos} ciclos.</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='color:{cor_texto}; text-align: center; font-family: Arial, sans-serif;'>{icone} {mensagem}</h3>", unsafe_allow_html=True)
     st.markdown(f"<p style='color:{cor_texto}; text-align: center; font-size: 18px;'>Isso deve ocorrer em, aproximadamente {days} dias e {hours} horas.</p>", unsafe_allow_html=True)
-
-# Visor para o número da previsão (ciclos)
+    
+    # Visor para o número da previsão (ciclos) e o tempo (dias e horas)
     st.markdown(f"""
-        <div style="background-color: #000000; color: #ffffff; font-size: 40px; font-weight: bold; padding: 20px; width: 150px; margin: 0 auto; border-radius: 10px; text-align: center;">
-            {proxima_falha_ciclos}
+        <div style="display: flex; justify-content: center; gap: 20px;">
+            <div style="background-color: #000000; color: #ffffff; font-size: 40px; font-weight: bold; padding: 20px; width: 150px; border-radius: 10px; text-align: center;">
+                {proxima_falha_ciclos}
+            </div>
+            <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 20px; width: 150px; border-radius: 10px; text-align: center;">
+                {days}d {hours}h
+            </div>
         </div>
     """, unsafe_allow_html=True)
-
-# Visor para o tempo estimado (dias e horas)
-    st.markdown(f"""
-        <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 20px; width: 150px; margin: 20px auto; border-radius: 10px; text-align: center;">
-            {days}d {hours}h
-        </div>
-    """, unsafe_allow_html=True)
-
-# Adicionando um divisor visual
+    
+    # Adicionando um divisor visual
     st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
-
-
+    
+    
 
 
     if st.button("Voltar à Página Principal"):
