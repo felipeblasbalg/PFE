@@ -4,7 +4,8 @@ from analysis import Analysis
 import plotly.graph_objects as go
 lista_prediction_anteriores = []
 contador = 1
-num_ciclos = []
+num_ciclos = list(range(1, len(lista_prediction_anteriores) + 1))
+
 # Configuração da página e inicialização do objeto de análise
 st.set_page_config(page_title="Análise de Dados", layout="wide")
 image1 = "logoInsper3.png"
