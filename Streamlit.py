@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from analysis import Analysis
 import plotly.graph_objects as go
-
+lista = [15,13,12,15,12,10,11,9,8,6,9,8]
 # Configuração da página e inicialização do objeto de análise
 st.set_page_config(page_title="Análise de Dados", layout="wide")
 image1 = "logoInsper3.png"
@@ -185,13 +185,14 @@ def results_page():
     # Adicionando um divisor visual
     st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
     
-    num_ciclos = list(range(1, len(st.session_state['lista_prediction_anteriores']) + 1))
+    #num_ciclos = list(range(1, len(st.session_state['lista_prediction_anteriores']) + 1))
+    num_ciclos = list(range(1, len(lista) + 1))
     # Criação do gráfico interativo
     fig = go.Figure()
     
     # Adicionando a linha ao gráfico
-    fig.add_trace(go.Scatter(x=num_ciclos, y=st.session_state['lista_prediction_anteriores'], mode='lines+markers', name='Previsão de Falha'))
-    
+    #fig.add_trace(go.Scatter(x=num_ciclos, y=st.session_state['lista_prediction_anteriores'], mode='lines+markers', name='Previsão de Falha'))
+    fig.add_trace(go.Scatter(x=num_ciclos, y=lista, mode='lines+markers', name='Previsão de Falha'))
     # Títulos e rótulos dos eixos
     fig.update_layout(
         title='Previsão de Falha ao Longo dos Ciclos',
