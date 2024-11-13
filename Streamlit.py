@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from analysis import Analysis
 import plotly.graph_objects as go
-lista_prediction_anteriores = []
 
 # Configuração da página e inicialização do objeto de análise
 st.set_page_config(page_title="Análise de Dados", layout="wide")
@@ -100,7 +99,7 @@ def upload_page():
                         st.session_state["proxima_falha_ciclos"] = prediction[0][-1]
                         st.session_state["proxima_falha_segundos"] = prediction[1] * prediction[0][-1]
                            
-                        lista_prediction_anteriores = prediction[0][-30:] if len(prediction[0]) > 30 else prediction[0]
+                        st.session_state['lista_prediction_anteriores'] = prediction[0][-30:] if len(prediction[0]) > 30 else prediction[0]
                                                
                         print(st.session_state["previsoes_ultimos_ciclos"])
 
@@ -180,12 +179,12 @@ def results_page():
     # Adicionando um divisor visual
     st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
     
-    num_ciclos = list(range(1, len(lista_prediction_anteriores) + 1))
+    num_ciclos = list(range(1, len(st.session_state['lista_prediction_anteriores']) + 1))
     # Criação do gráfico interativo
     fig = go.Figure()
     
     # Adicionando a linha ao gráfico
-    fig.add_trace(go.Scatter(x=num_ciclos, y=lista_prediction_anteriores, mode='lines+markers', name='Previsão de Falha'))
+    fig.add_trace(go.Scatter(x=num_ciclos, y=st.session_state['lista_prediction_anteriores'], mode='lines+markers', name='Previsão de Falha'))
     
     # Títulos e rótulos dos eixos
     fig.update_layout(
