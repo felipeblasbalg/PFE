@@ -152,17 +152,17 @@ def results_page():
         cor_fundo = "#f8d7da"  # Vermelho claro para alerta
         cor_texto = "#721c24"  # Vermelho escuro
         icone = "⚠️"
-        mensagem = f"Atenção: A próxima falha ocorrerá em {proxima_falha_ciclos} ciclos, que é muito próximo!"
+        mensagem = f"Atenção: A próxima falha ocorrerá em {proxima_falha_ciclos} ciclos!"
     elif 5 < proxima_falha_ciclos <= 10:
         cor_fundo = "#fff3cd"  # Amarelo claro para uma advertência menos crítica
         cor_texto = "#856404"  # Amarelo escuro
         icone = "🛠️"
-        mensagem = f"A bomba está funcional, mas a falha está prevista em {proxima_falha_ciclos} ciclos."
+        mensagem = f"O sistema de bombas está funcional, mas a falha está prevista em {proxima_falha_ciclos} ciclos."
     else:
         cor_fundo = "#d4edda"  # Verde claro para indicar que tudo está seguro
         cor_texto = "#155724"  # Verde escuro
         icone = "✅"
-        mensagem = f"A bomba está funcionando com segurança, próxima falha em {proxima_falha_ciclos} ciclos."
+        mensagem = f"O sistema de bombas está funcionando com segurança, próxima falha em {proxima_falha_ciclos} ciclos."
     
     # Exibindo a previsão de falha e tempo estimado com a nomenclatura solicitada
     st.markdown("---")
