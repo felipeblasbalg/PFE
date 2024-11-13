@@ -179,7 +179,8 @@ def results_page():
     
     # Adicionando um divisor visual
     st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
-
+    
+    lista_prediction_anteriores = [10,12,10,12,6,6,8,6,5,5,4,5,3]
     num_ciclos = list(range(1, len(lista_prediction_anteriores) + 1))
     # Criação do gráfico interativo
     fig = go.Figure()
