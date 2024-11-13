@@ -104,7 +104,7 @@ def upload_page():
                            
                         lista_prediction_anteriores = []
                         contador = 0
-                        while len(lista_prediction_anteriores) >= 29:
+                        while len(lista_prediction_anteriores) >= 30:
                             contador += 1
                             lista_prediction_anteriores.append(prediction[0][-(contador)])
                         lista_prediction_anteriores = lista_prediction_anteriores[::-1]
