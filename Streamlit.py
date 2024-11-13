@@ -102,12 +102,13 @@ def upload_page():
                         st.session_state["proxima_falha_ciclos"] = prediction[0][-1]
                         st.session_state["proxima_falha_segundos"] = prediction[1] * prediction[0][-1]
                            
-                        lista_prediction_anteriores = []
-                        contador = 0
-                        while len(lista_prediction_anteriores) >= 30:
-                            contador += 1
-                            lista_prediction_anteriores.append(prediction[0][-(contador)])
-                        lista_prediction_anteriores = lista_prediction_anteriores[::-1]
+                        #lista_prediction_anteriores = []
+                       # contador = 0
+                        #while len(lista_prediction_anteriores) >= 30:
+                           # contador += 1
+                           # lista_prediction_anteriores.append(prediction[0][-(contador)])
+                        #lista_prediction_anteriores = lista_prediction_anteriores[::-1]
+                        lista_prediction_anteriores = prediction[0][-30:] if len(prediction[0]) > 30 else prediction[0]
                                                
                         print(st.session_state["previsoes_ultimos_ciclos"])
 
