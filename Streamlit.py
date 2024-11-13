@@ -99,7 +99,13 @@ def upload_page():
                         st.session_state["proxima_falha_ciclos"] = prediction[0][-1]
                         st.session_state["proxima_falha_segundos"] = prediction[1] * prediction[0][-1]
                            
+                                                # No momento de fazer a previsão (dentro da função upload_page):
+                        if 'lista_prediction_anteriores' not in st.session_state:
+                            st.session_state['lista_prediction_anteriores'] = []  # Defina uma lista vazia caso não exista
+                        
+                        # Agora, adicione a nova previsão à lista
                         st.session_state['lista_prediction_anteriores'] = prediction[0][-30:] if len(prediction[0]) > 30 else prediction[0]
+
                                                
                         print(st.session_state["previsoes_ultimos_ciclos"])
 
