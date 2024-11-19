@@ -94,17 +94,17 @@ def upload_page():
                         print("Formatação dos dados para a predição     OK")
                         analysis_object.format()
                         print("Predição                                 OK")
-                        prediction = analysis_object.predict()
-                        st.session_state["previsoes_ultimos_ciclos"] = prediction[0]
-                        st.session_state["proxima_falha_ciclos"] = prediction[0][-1]
-                        st.session_state["proxima_falha_segundos"] = prediction[1] * prediction[0][-1]
+                        df_predictions, average_cycle_duration = analysis_object.predict()
+                        st.session_state["previsoes_ultimos_ciclos"] = list(df_predictions["Prediction"])
+                        st.session_state["proxima_falha_ciclos"] = list(df_predictions["Prediction"])[-1]
+                        st.session_state["proxima_falha_segundos"] = list(df_predictions["Prediction"])[-1] * average_cycle_duration
                            
-                                                # No momento de fazer a previsão (dentro da função upload_page):
+                        # No momento de fazer a previsão (dentro da função upload_page):
                         if 'lista_prediction_anteriores' not in st.session_state:
                             st.session_state['lista_prediction_anteriores'] = []  # Defina uma lista vazia caso não exista
                         
                         # Agora, adicione a nova previsão à lista
-                        st.session_state['lista_prediction_anteriores'] = prediction[0][-30:] if len(prediction[0]) > 30 else prediction[0]
+                        st.session_state['lista_prediction_anteriores'] = list(df_predictions["Prediction"])[-30:] if len(list(df_predictions["Prediction"])) > 30 else list(df_predictions["Prediction"])
 
                                                
                         print(st.session_state["previsoes_ultimos_ciclos"])

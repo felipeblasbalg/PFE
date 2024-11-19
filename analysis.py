@@ -40,22 +40,14 @@ class Analysis:
         self.df_alarms = self.df_alarms[self.df_alarms["InTime"] >= self.df_levels["Data"].min()]
         self.df_levels = self.df_levels[self.df_levels["Data"] >= self.df_alarms["InTime"].min()]
 
-        print("!@#$%@#$%@#$%@#$%@$%@#$%@#$")
-        print(self.df_alarms)
-        print(self.df_levels)
-
         # verifica o momento da última falha e esquece tudo que vem antes
         last_error = self.df_alarms[self.df_alarms["AlarmSourceName"].isin(["SJ40AD_BOAD5_DF", "SJ40AD_BOAD6_DF"])]["EventTime"].max()
         if pd.isna(last_error): last_error = pd.to_datetime("01/01/2000")
-        print(last_error)
         self.df_levels = self.df_levels[self.df_levels["Data"] > last_error]
         self.df_alarms = self.df_alarms[self.df_alarms["EventTime"] > last_error]
 
-        print("!@#$%@#$%@#$%@#$%@$%@#$%@#$")
-        print(self.df_alarms)
-        print(self.df_levels)
-
-        if len(self.df_alarms) == 0 or len(self.df_levels) == 0: raise ValueError("sem dados suficientes")
+        # se não houverem dados o suficiente, gera um erro
+        if len(self.df_alarms) == 0 or len(self.df_levels) == 0: raise ValueError("sem dados suficientes nos arquivos")
 
 
     def split_cycles(self):
@@ -71,28 +63,23 @@ class Analysis:
         # definição do dataframe dos ciclos
         self.df_cycles = pd.DataFrame({"Cycle": [], "StartTime": [], "EndTime": []})
 
-        print(self.df_alarms)
-
         # definição dos valores iniciais
-        c = 0
-        print(c); c+=1
         current_cycle = 0
-        print(c); c+=1
         self.df_cycles.loc[0, "Cycle"] = 0
-        print(c); c+=1
         self.df_cycles.loc[0, "StartTime"] = self.df_alarms["InTime"].min()
-        print(c); c+=1
         self.df_cycles.loc[0, "StartLevel"] = self.df_alarms.loc[self.df_alarms["InTime"].idxmin(), "InLevel"]
-        print(c); c+=1
         activation_times_to_levels = dict()
-        print(c); c+=1
+        main_pump = ["SJ40AD_BOAD5_DG", "SJ40AD_BOAD6_DG"]
+        main_pump_running = False
 
         # loop de coleta dos ciclos
         for index, row in self.df_alarms.iterrows():
 
-            # se for evento de desligamento de qualquer uma das bombas e o nível da água estiver abaixo do nível de desligamento
-            if row["AlarmSourceName"] in ["SJ40AD_BOAD5_DG", "SJ40AD_BOAD6_DG"]:
+            # se for evento de desligamento da bomba principal e o nível da água estiver abaixo do nível de desligamento
+            if row["AlarmSourceName"] in main_pump:
                 if row["InLevel"] <= self.df_reference[self.df_reference["Data"] == str(row["InTime"].date())]["DesligaPrincipal"].iloc[0]:
+
+                    main_pump_running = False
 
                     # valores do primeiro acionamento de bomba do ciclo (momento e nível)
                     try:
@@ -103,7 +90,6 @@ class Analysis:
                         self.df_cycles.loc[current_cycle, "FirstActivationLevel"] = None
                     
                     # registra momento do final do ciclo, limpa o dicionário de acionamentos e incrementa o ID do ciclo
-                    self.df_cycles.loc[current_cycle, "NumberOfActivations"] = len(activation_times_to_levels)
                     self.df_cycles.loc[current_cycle, "EndTime"] = row["InTime"]
                     activation_times_to_levels = dict()
                     current_cycle += 1
@@ -113,35 +99,40 @@ class Analysis:
                     self.df_cycles.loc[current_cycle, "StartTime"] = row["InTime"]
                     self.df_cycles.loc[current_cycle, "StartLevel"] = row["InLevel"]
 
-            # se for evento de acionamento de qualquer uma das bombas e o nível da água estiver acima do nível de acionamento
+            # se for evento de acionamento de qualquer uma das bombas e nenhuma bomba tenha sido acionada ainda
             if row["AlarmSourceName"] in ["SJ40AD_BOAD5_LG", "SJ40AD_BOAD6_LG"]:
-                activation_times_to_levels[row["InTime"]] = row["InLevel"]
+                if not main_pump_running:
+
+                    activation_times_to_levels[row["InTime"]] = row["InLevel"]
+
+                    # registra qual a bomba principal do ciclo
+                    if row["AlarmSourceName"] == "SJ40AD_BOAD5_LG":
+                        self.df_cycles.loc[current_cycle, "MainPump"] = 5
+                        self.df_cycles.loc[current_cycle, "ReservePump"] = 6
+                    if row["AlarmSourceName"] == "SJ40AD_BOAD6_LG":
+                        self.df_cycles.loc[current_cycle, "MainPump"] = 6
+                        self.df_cycles.loc[current_cycle, "ReservePump"] = 5
+                    main_pump = [row["AlarmSourceName"][:-2] + "DG"]
+                    main_pump_running = True
         
         # atualiza o tipo da variável de início e fim do ciclo
         self.df_cycles["StartTime"] = pd.to_datetime(self.df_cycles["StartTime"])
         self.df_cycles["EndTime"] = pd.to_datetime(self.df_cycles["EndTime"])
 
         # se não houverem ciclos o suficiente, gera um erro
-        if len(self.df_cycles) <= 2: raise ValueError("sem nenhum ciclo de operação completo")
+        if len(self.df_cycles) <= 2: raise ValueError("sem dados suficientes nos arquivos: nenhum ciclo de operação completo nos dados fornecidos")
 
         # remove o primeiro e o último ciclo
         self.df_cycles = self.df_cycles[self.df_cycles["Cycle"] != 0]
         self.df_cycles = self.df_cycles[self.df_cycles["Cycle"] != self.df_cycles["Cycle"].max()]
 
-        # define o tamanho dos ciclos
-        cycle_sizes = list()
-        for index, row in self.df_cycles.iterrows():
-            df_cycle_levels = self.df_levels[self.df_levels["Data"] >= row["StartTime"]]
-            df_cycle_levels = df_cycle_levels[df_cycle_levels["Data"] < row["EndTime"]]
-            df_cycle_levels.sort_values(by="Data")
-            levels_diff_list = list(df_cycle_levels["Valor"])
-            cycle_sizes.append(len(levels_diff_list))
-        self.df_cycles["Len"] = cycle_sizes
+        # calcula a duração dos ciclos
+        self.df_cycles["Duration"] = (self.df_cycles["EndTime"] - self.df_cycles["StartTime"]).dt.total_seconds()
 
-        # filtra o ciclos muito compridos e muito curtos
-        q2 = self.df_cycles["Len"].quantile(1.00)
-        q1 = self.df_cycles["Len"].quantile(0.05)
-        self.df_cycles = self.df_cycles[self.df_cycles["Len"] > q1][self.df_cycles["Len"] < q2]
+        # filtra os ciclos muito longos ou muito curtos
+        q2 = self.df_cycles["Duration"].quantile(0.99)
+        q1 = self.df_cycles["Duration"].quantile(0.01)
+        self.df_cycles = self.df_cycles[self.df_cycles["Duration"] > q1][self.df_cycles["Duration"] < q2]
 
         # se não houverem ciclos o suficiente, gera um erro
         if len(self.df_cycles) <= 2: raise ValueError("sem nenhum ciclo de operação completo")
@@ -158,12 +149,15 @@ class Analysis:
 
         # cria o array das derivadas padronizadas dos ciclos
         self.cycles_array = list()
+        cycle_sizes = list()
         for _, row in self.df_cycles.iterrows():
             df_cycle_levels = self.df_levels[self.df_levels["Data"] >= row["StartTime"]]
             df_cycle_levels = df_cycle_levels[df_cycle_levels["Data"] < row["EndTime"]]
             df_cycle_levels.sort_values(by="Data")
             levels_diff_list = list(df_cycle_levels["DerivadaPadronizada"])
             self.cycles_array.append(levels_diff_list)
+            cycle_sizes.append(len(levels_diff_list))
+        self.df_cycles["Len"] = cycle_sizes
 
 
     def predict(self):
@@ -179,7 +173,11 @@ class Analysis:
         predictions = np.squeeze(predictions)
         predictions = predictions * self.variables["max_cycles_without_error"] + 1
 
-        return list(predictions), self.variables["average_cycle_duration"]
+        # diferencia pela bomba principal
+        self.df_cycles["Prediction"] = predictions
+        print(self.df_cycles)
+
+        return self.df_cycles, self.variables["average_cycle_duration"]
 
 
     @staticmethod
