@@ -193,7 +193,7 @@ def results_page():
     </div>
     """, unsafe_allow_html=True)
     
-    # Função para exibir as informações de falha
+        # Função para exibir as informações de falha
     def exibir_previsao_bomba(nome_bomba, ciclos, segundos):
         if ciclos is None or segundos is None:
             st.markdown(f"""
@@ -210,23 +210,19 @@ def results_page():
     
         # Define as cores e mensagens com base no número de ciclos
         if ciclos <= 5:
-            cor_fundo = "#f8d7da"  # Vermelho claro para alerta
             cor_texto = "#721c24"  # Vermelho escuro
             icone = "⚠️"
             mensagem = f"Atenção: A próxima falha da bomba {nome_bomba} ocorrerá em {ciclos} ciclos!"
         elif 5 < ciclos <= 10:
-            cor_fundo = "#fff3cd"  # Amarelo claro para uma advertência menos crítica
             cor_texto = "#856404"  # Amarelo escuro
             icone = "🛠️"
             mensagem = f"A bomba {nome_bomba} está funcional, mas a falha está prevista para {ciclos} ciclos."
         else:
-            cor_fundo = "#d4edda"  # Verde claro para indicar que tudo está seguro
             cor_texto = "#155724"  # Verde escuro
             icone = "✅"
             mensagem = f"A bomba {nome_bomba} está funcionando com segurança, próxima falha em {ciclos} ciclos."
     
         # Exibe a mensagem de previsão
-        st.markdown("---")
         st.markdown(f"<h3 style='color:{cor_texto}; text-align: center; font-family: Arial, sans-serif;'>{icone} {mensagem}</h3>", unsafe_allow_html=True)
         st.markdown(f"<p style='color:{cor_texto}; text-align: center; font-size: 18px;'>Isso deve ocorrer em, aproximadamente {dias} dias e {horas} horas.</p>", unsafe_allow_html=True)
     
@@ -243,11 +239,12 @@ def results_page():
             </div>
         """, unsafe_allow_html=True)
     
-        # Adiciona um divisor visual
-        st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
     
+    # Previsão e gráfico para BOAD5
+    st.markdown("""
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 50px; border: 1px solid #ccc; margin-bottom: 20px;">
+    """, unsafe_allow_html=True)
     
-    # Exibe as informações para BOAD5
     exibir_previsao_bomba(
         nome_bomba="BOAD5",
         ciclos=st.session_state.get("proxima_falha_BOAD5_ciclos"),
@@ -274,7 +271,14 @@ def results_page():
     # Exibindo o gráfico no Streamlit para BOAD5
     st.plotly_chart(fig5)
     
-    # Exibe as informações para BOAD6
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    
+    # Previsão e gráfico para BOAD6
+    st.markdown("""
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 50px; border: 1px solid #ccc; margin-bottom: 20px;">
+    """, unsafe_allow_html=True)
+    
     exibir_previsao_bomba(
         nome_bomba="BOAD6",
         ciclos=st.session_state.get("proxima_falha_BOAD6_ciclos"),
@@ -300,6 +304,9 @@ def results_page():
     
     # Exibindo o gráfico no Streamlit para BOAD6
     st.plotly_chart(fig6)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
