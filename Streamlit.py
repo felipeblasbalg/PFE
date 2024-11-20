@@ -184,7 +184,7 @@ def upload_page():
 # Função da página de resultados
 def results_page():
     st.title("Resultados da Análise dos Dados")
-    
+
     # Cabeçalho visual para a página de resultados
     st.markdown("""
     <div style="background-color: #28a745; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
@@ -224,12 +224,24 @@ def results_page():
 
         # Exibe a mensagem de previsão
         st.markdown(f"<h3 style='color:{cor_texto}; text-align: center; font-family: Arial, sans-serif;'>{icone} {mensagem}</h3>", unsafe_allow_html=True)
-        st.markdown(f"<p style='color:{cor_texto}; text-align: center; font-size: 18px;'>Isso deve ocorrer em, aproximadamente {dias} dias e {horas} horas.</p>", unsafe_allow_html=True)
+
+        # Adiciona a visualização com ciclos e tempo estimado
+        st.markdown(f"""
+            <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; color: {cor_texto};">
+                <span>Falha prevista para:</span>
+                <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
+                    {ciclos} ciclos
+                </div>
+                <div style="background-color: #000000; color: #ffffff; font-size: 25px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
+                    {dias}d {horas}h
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
 
     # Previsão e gráfico para BOAD5
     st.markdown("""
     <div style="background-color: #007bff; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-        <h3 style="color: white; text-align: center;">BOAD5</h3>
+        <h3 style="color: white; text-align: center;">Barragem - BOAD5</h3>
     """, unsafe_allow_html=True)
 
     exibir_previsao_bomba(
@@ -263,7 +275,7 @@ def results_page():
     # Previsão e gráfico para BOAD6
     st.markdown("""
     <div style="background-color: #007bff; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-        <h3 style="color: white; text-align: center;">BOAD6</h3>
+        <h3 style="color: white; text-align: center;">Barragem - BOAD6</h3>
     """, unsafe_allow_html=True)
 
     exibir_previsao_bomba(
@@ -293,6 +305,7 @@ def results_page():
     st.plotly_chart(fig6)
 
     st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
