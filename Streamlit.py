@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from analysis import Analysis
 import plotly.graph_objects as go
-lista = [15,13,12,15,12,10,11,9,8,6,9,8]
+#lista = [15,13,12,15,12,10,11,9,8,6,9,8]
 # Configuração da página e inicialização do objeto de análise
 st.set_page_config(page_title="Análise de Dados", layout="wide")
 image1 = "logoInsper3.png"
@@ -109,11 +109,11 @@ def upload_page():
                         st.session_state["proxima_falha_BOAD6_segundos"] = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])[-1] * average_cycle_duration
                            
                         # No momento de fazer a previsão (dentro da função upload_page):
-                        if 'lista_prediction_anteriores' not in st.session_state:
-                            st.session_state['lista_prediction_anteriores'] = []  # Defina uma lista vazia caso não exista
+                        if 'lista_prediction_BOAD5' not in st.session_state:
+                            st.session_state['lista_prediction_BOAD5'] = []  # Defina uma lista vazia caso não exista
                         
                         # Agora, adicione a nova previsão à lista
-                        st.session_state['lista_prediction_anteriores'] = list(df_predictions["Prediction"])[-30:] if len(list(df_predictions["Prediction"])) > 30 else list(df_predictions["Prediction"])
+                        st.session_state['lista_prediction_BOAD5'] = list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])[-30:] if len(list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])) > 30 else list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])
                                                
                         print(st.session_state["previsoes_ultimos_ciclos"])
 
@@ -165,21 +165,21 @@ def results_page():
     """, unsafe_allow_html=True)
     
     # Estilos para as mensagens
-    if proxima_falha_ciclos <= 5:
+    if proxima_falha_BOAD5_ciclos <= 5:
         cor_fundo = "#f8d7da"  # Vermelho claro para alerta
         cor_texto = "#721c24"  # Vermelho escuro
         icone = "⚠️"
-        mensagem = f"Atenção: A próxima falha ocorrerá em {proxima_falha_ciclos} ciclos!"
-    elif 5 < proxima_falha_ciclos <= 10:
+        mensagem = f"Atenção: A próxima falha da bomba BOAD5 ocorrerá em {proxima_falha_BOAD5_ciclos} ciclos!"
+    elif 5 < proxima_falha_BOAD5_ciclos <= 10:
         cor_fundo = "#fff3cd"  # Amarelo claro para uma advertência menos crítica
         cor_texto = "#856404"  # Amarelo escuro
         icone = "🛠️"
-        mensagem = f"O sistema de bombas está funcional, mas a falha está prevista em {proxima_falha_ciclos} ciclos."
+        mensagem = f"A bomba BOAD5 está funcional, mas a falha está prevista para {proxima_falha_BOAD5_ciclos} ciclos."
     else:
         cor_fundo = "#d4edda"  # Verde claro para indicar que tudo está seguro
         cor_texto = "#155724"  # Verde escuro
         icone = "✅"
-        mensagem = f"O sistema de bombas está funcionando com segurança, próxima falha em {proxima_falha_ciclos} ciclos."
+        mensagem = f"A bomba BOAD5 está funcionando com segurança, próxima falha em {proxima_falha_BOAD5_ciclos} ciclos."
     
     # Exibindo a previsão de falha e tempo estimado com a nomenclatura solicitada
     st.markdown("---")
@@ -191,7 +191,7 @@ def results_page():
         <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; color: {cor_texto};">
             <span>Falha prevista para:</span>
             <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
-                {proxima_falha_ciclos} ciclos
+                {proxima_falha_BOAD5_ciclos} ciclos
             </div>
             <div style="background-color: #000000; color: #ffffff; font-size: 25px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
                 {days}d {hours}h
@@ -202,14 +202,15 @@ def results_page():
     # Adicionando um divisor visual
     st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
     
-    #num_ciclos = list(range(1, len(st.session_state['lista_prediction_anteriores']) + 1))
-    num_ciclos = list(range(1, len(lista) + 1))
+        # Define o eixo X com o mesmo tamanho do eixo Y
+    num_ciclos = list(range(1, len(st.session_state['lista_prediction_BOAD5']) + 1))
+    
     # Criação do gráfico interativo
     fig = go.Figure()
     
     # Adicionando a linha ao gráfico
-    #fig.add_trace(go.Scatter(x=num_ciclos, y=st.session_state['lista_prediction_anteriores'], mode='lines+markers', name='Previsão de Falha'))
-    fig.add_trace(go.Scatter(x=num_ciclos, y=lista, mode='lines+markers', name='Previsão de Falha'))
+    fig.add_trace(go.Scatter(x=num_ciclos, y=st.session_state['lista_prediction_BOAD5'], mode='lines+markers', name='Previsão de Falha da bomba BOAD5'))
+    
     # Títulos e rótulos dos eixos
     fig.update_layout(
         title='Previsão de Falha ao Longo dos Ciclos',
@@ -220,6 +221,7 @@ def results_page():
     
     # Exibindo o gráfico no Streamlit
     st.plotly_chart(fig)
+
 
     if st.button("Voltar à Página Principal"):
         st.session_state['current_page'] = 'upload_page'
