@@ -245,7 +245,7 @@ def results_page():
     """, unsafe_allow_html=True)
 
     exibir_previsao_bomba(
-        nome_bomba="BOAD5",
+        nome_bomba="BOAD 05",
         ciclos=st.session_state.get("proxima_falha_BOAD5_ciclos"),
         segundos=st.session_state.get("proxima_falha_BOAD5_segundos")
     )
@@ -279,7 +279,7 @@ def results_page():
     """, unsafe_allow_html=True)
 
     exibir_previsao_bomba(
-        nome_bomba="BOAD6",
+        nome_bomba="BOAD 06",
         ciclos=st.session_state.get("proxima_falha_BOAD6_ciclos"),
         segundos=st.session_state.get("proxima_falha_BOAD6_segundos")
     )
