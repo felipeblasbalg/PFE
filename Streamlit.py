@@ -101,25 +101,73 @@ def upload_page():
                         analysis_object.format()
                         print("Predição                                 OK")
                         df_predictions, average_cycle_duration = analysis_object.predict()
-                        st.session_state["previsoes_ultimos_ciclos"] = list(df_predictions["Prediction"])
-                        st.session_state["bombas_principais_ultimos_ciclos"] = list(df_predictions["MainPump"])
-                        st.session_state["proxima_falha_BOAD5_ciclos"] = list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])[-1]
-                        st.session_state["proxima_falha_BOAD5_segundos"] = list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])[-1] * average_cycle_duration
-                        st.session_state["proxima_falha_BOAD6_ciclos"] = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])[-1]
-                        st.session_state["proxima_falha_BOAD6_segundos"] = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])[-1] * average_cycle_duration
-                           
-                        #previsão previa BOAD5 (dentro da função upload_page):
+                                              
+                        # Verifique se a coluna "Prediction" existe e se não está vazia
+                        if "Prediction" in df_predictions and not df_predictions["Prediction"].empty:
+                            st.session_state["previsoes_ultimos_ciclos"] = list(df_predictions["Prediction"])
+                        else:
+                            st.session_state["previsoes_ultimos_ciclos"] = []
+                        
+                        # Verifique se a coluna "MainPump" existe e se não está vazia
+                        if "MainPump" in df_predictions and not df_predictions["MainPump"].empty:
+                            st.session_state["bombas_principais_ultimos_ciclos"] = list(df_predictions["MainPump"])
+                        else:
+                            st.session_state["bombas_principais_ultimos_ciclos"] = []
+                        
+                        # Verifique se há registros para MainPump == 5 antes de acessar o índice -1
+                        mainpump_5_predictions = list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])
+                        if mainpump_5_predictions:
+                            st.session_state["proxima_falha_BOAD5_ciclos"] = mainpump_5_predictions[-1]
+                            st.session_state["proxima_falha_BOAD5_segundos"] = mainpump_5_predictions[-1] * average_cycle_duration
+                        else:
+                            st.session_state["proxima_falha_BOAD5_ciclos"] = None
+                            st.session_state["proxima_falha_BOAD5_segundos"] = None
+                        
+                        # Verifique se há registros para MainPump == 6 antes de acessar o índice -1
+                        mainpump_6_predictions = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])
+                        if mainpump_6_predictions:
+                            st.session_state["proxima_falha_BOAD6_ciclos"] = mainpump_6_predictions[-1]
+                            st.session_state["proxima_falha_BOAD6_segundos"] = mainpump_6_predictions[-1] * average_cycle_duration
+                        else:
+                            st.session_state["proxima_falha_BOAD6_ciclos"] = None
+                            st.session_state["proxima_falha_BOAD6_segundos"] = None
+
+
+                        # Previsão anterior BOAD5 (dentro da função upload_page):
                         if 'lista_prediction_BOAD5' not in st.session_state:
-                            st.session_state['lista_prediction_BOAD5'] = []  # Defina uma lista vazia caso não exista
-                        # Agora, adicione a nova previsão à lista
-                        st.session_state['lista_prediction_BOAD5'] = list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])[-30:] if len(list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])) > 30 else list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])
+                            st.session_state['lista_prediction_BOAD5'] = []  # Cria uma lista vazia caso não exista
+                        
+                        # Obter as previsões para BOAD5
+                        mainpump_5_predictions = list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])
+                        
+                        # Verifique se há previsões para BOAD5
+                        if mainpump_5_predictions:
+                            # Adicione as últimas 30 previsões ou todas as previsões disponíveis
+                            st.session_state['lista_prediction_BOAD5'] = mainpump_5_predictions[-30:]  # Mantém as últimas 30 previsões, se houver
+                        else:
+                            st.session_state['lista_prediction_BOAD5'] = []  # Lista vazia se não houver previsões
+                        
+                        # Previsão anterior BOAD6 (dentro da função upload_page):
+                        if 'lista_prediction_BOAD6' not in st.session_state:
+                            st.session_state['lista_prediction_BOAD6'] = []  # Cria uma lista vazia caso não exista
+                        
+                        # Obter as previsões para BOAD6
+                        mainpump_6_predictions = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])
+                        
+                        # Verifique se há previsões para BOAD6
+                        if mainpump_6_predictions:
+                            # Adicione as últimas 30 previsões ou todas as previsões disponíveis
+                            st.session_state['lista_prediction_BOAD6'] = mainpump_6_predictions[-30:]  # Mantém as últimas 30 previsões, se houver
+                        else:
+                            st.session_state['lista_prediction_BOAD6'] = []  # Lista vazia se não houver previsões
+                        
+                        
+
+
+
+
                            
-                        #previsçao prévia BOAD6 (dentro da função upload_page):
-                        if 'lista_prediction_BOAD5' not in st.session_state:
-                            st.session_state['lista_prediction_BOAD6'] = []  # Defina uma lista vazia caso não exista
-                        # Agora, adicione a nova previsão à lista
-                        st.session_state['lista_prediction_BOAD6'] = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])[-30:] if len(list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])) > 30 else list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])
-                                               
+                       
 
                            
                         print(st.session_state["previsoes_ultimos_ciclos"])
@@ -150,97 +198,113 @@ def results_page():
     </div>
     """, unsafe_allow_html=True)
     
-    # obtendo a previsão de ciclos até a falha
-    proxima_falha_BOAD5_ciclos = round(st.session_state["proxima_falha_BOAD5_ciclos"])
-    proxima_falha_BOAD6_ciclos = round(st.session_state["proxima_falha_BOAD6_ciclos"])
-    proxima_falha_ciclos = min(proxima_falha_BOAD5_ciclos, proxima_falha_BOAD6_ciclos)
-
-    # obtendo a previsão de segundos até a falha
-    proxima_falha_BOAD5_segundos = round(st.session_state["proxima_falha_BOAD5_segundos"])
-    proxima_falha_BOAD6_segundos = round(st.session_state["proxima_falha_BOAD6_segundos"])
-    proxima_falha_segundos = min(proxima_falha_BOAD5_segundos, proxima_falha_BOAD6_segundos)
-
-    # calcula quantos em quantos dias e horas a falha deve ocorrer
-    proxima_falha_BOAD5_dias, proxima_falha_BOAD5_horas = to_days_and_hours(proxima_falha_BOAD5_segundos)
-    proxima_falha_BOAD6_dias, proxima_falha_BOAD6_horas = to_days_and_hours(proxima_falha_BOAD6_segundos)
-    days, hours = to_days_and_hours(proxima_falha_segundos)
-
-    st.markdown(f"""
-        Bomba BOAD5 como principal: {proxima_falha_BOAD5_ciclos} ciclos, o que deve demorar aproximadamente {proxima_falha_BOAD5_dias} dias e {proxima_falha_BOAD5_horas} horas.
-        
-        Bomba BOAD6 como principal: {proxima_falha_BOAD6_ciclos} ciclos, o que deve demorar aproximadamente {proxima_falha_BOAD6_dias} dias e {proxima_falha_BOAD6_horas} horas.
-    """, unsafe_allow_html=True)
+       # Função para exibir as informações de falha
+    def exibir_previsao_bomba(nome_bomba, ciclos, segundos):
+        if ciclos is None or segundos is None:
+            st.markdown(f"""
+                <h3 style="color:#721c24; text-align: center; font-family: Arial, sans-serif;">
+                ⚠️ Atenção: Não há dados suficientes para prever falhas na bomba {nome_bomba}.</h3>
+            """, unsafe_allow_html=True)
+            return
     
-    # Estilos para as mensagens
-    if proxima_falha_BOAD5_ciclos <= 5:
-        cor_fundo = "#f8d7da"  # Vermelho claro para alerta
-        cor_texto = "#721c24"  # Vermelho escuro
-        icone = "⚠️"
-        mensagem = f"Atenção: A próxima falha da bomba BOAD5 ocorrerá em {proxima_falha_BOAD5_ciclos} ciclos!"
-    elif 5 < proxima_falha_BOAD5_ciclos <= 10:
-        cor_fundo = "#fff3cd"  # Amarelo claro para uma advertência menos crítica
-        cor_texto = "#856404"  # Amarelo escuro
-        icone = "🛠️"
-        mensagem = f"A bomba BOAD5 está funcional, mas a falha está prevista para {proxima_falha_BOAD5_ciclos} ciclos."
-    else:
-        cor_fundo = "#d4edda"  # Verde claro para indicar que tudo está seguro
-        cor_texto = "#155724"  # Verde escuro
-        icone = "✅"
-        mensagem = f"A bomba BOAD5 está funcionando com segurança, próxima falha em {proxima_falha_BOAD5_ciclos} ciclos."
+        # Calcula os dias e horas com base nos segundos
+        dias, horas = to_days_and_hours(segundos)
     
-    # Exibindo a previsão de falha e tempo estimado com a nomenclatura solicitada
-    st.markdown("---")
-    st.markdown(f"<h3 style='color:{cor_texto}; text-align: center; font-family: Arial, sans-serif;'>{icone} {mensagem}</h3>", unsafe_allow_html=True)
-    st.markdown(f"<p style='color:{cor_texto}; text-align: center; font-size: 18px;'>Isso deve ocorrer em, aproximadamente {days} dias e {hours} horas.</p>", unsafe_allow_html=True)
+        # Define as cores e mensagens com base no número de ciclos
+        if ciclos <= 5:
+            cor_fundo = "#f8d7da"  # Vermelho claro para alerta
+            cor_texto = "#721c24"  # Vermelho escuro
+            icone = "⚠️"
+            mensagem = f"Atenção: A próxima falha da bomba {nome_bomba} ocorrerá em {ciclos} ciclos!"
+        elif 5 < ciclos <= 10:
+            cor_fundo = "#fff3cd"  # Amarelo claro para uma advertência menos crítica
+            cor_texto = "#856404"  # Amarelo escuro
+            icone = "🛠️"
+            mensagem = f"A bomba {nome_bomba} está funcional, mas a falha está prevista para {ciclos} ciclos."
+        else:
+            cor_fundo = "#d4edda"  # Verde claro para indicar que tudo está seguro
+            cor_texto = "#155724"  # Verde escuro
+            icone = "✅"
+            mensagem = f"A bomba {nome_bomba} está funcionando com segurança, próxima falha em {ciclos} ciclos."
     
-    # Adicionando a sentença "Falha prevista para" alinhada com os visores
-    st.markdown(f"""
-        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; color: {cor_texto};">
-            <span>Falha prevista para:</span>
-            <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
-                {proxima_falha_BOAD5_ciclos} ciclos
+        # Exibe a mensagem de previsão
+        st.markdown("---")
+        st.markdown(f"<h3 style='color:{cor_texto}; text-align: center; font-family: Arial, sans-serif;'>{icone} {mensagem}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<p style='color:{cor_texto}; text-align: center; font-size: 18px;'>Isso deve ocorrer em, aproximadamente {dias} dias e {horas} horas.</p>", unsafe_allow_html=True)
+    
+        # Adiciona a visualização com ciclos e tempo estimado
+        st.markdown(f"""
+            <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; color: {cor_texto};">
+                <span>Falha prevista para:</span>
+                <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
+                    {ciclos} ciclos
+                </div>
+                <div style="background-color: #000000; color: #ffffff; font-size: 25px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
+                    {dias}d {horas}h
+                </div>
             </div>
-            <div style="background-color: #000000; color: #ffffff; font-size: 25px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
-                {days}d {hours}h
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
-    # Adicionando um divisor visual
-    st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
+        # Adiciona um divisor visual
+        st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
     
-        # Define o eixo X com o mesmo tamanho do eixo Y BOAD5
+    
+    # Exibe as informações para BOAD5
+    exibir_previsao_bomba(
+        nome_bomba="BOAD5",
+        ciclos=st.session_state.get("proxima_falha_BOAD5_ciclos"),
+        segundos=st.session_state.get("proxima_falha_BOAD5_segundos")
+    )
+    
+    # Exibe as informações para BOAD6
+    exibir_previsao_bomba(
+        nome_bomba="BOAD6",
+        ciclos=st.session_state.get("proxima_falha_BOAD6_ciclos"),
+        segundos=st.session_state.get("proxima_falha_BOAD6_segundos")
+    )
+
+    
+    # Previsão de falha para BOAD5 (usando as últimas 30 previsões ou o que houver disponível)
     num_ciclos5 = list(range(1, len(st.session_state['lista_prediction_BOAD5']) + 1))
-    # Criação do gráfico interativo
+    
+    # Criação do gráfico interativo para BOAD5
     fig5 = go.Figure()
-    # Adicionando a linha ao gráfico
+    
+    # Adicionando a linha ao gráfico para BOAD5
     fig5.add_trace(go.Scatter(x=num_ciclos5, y=st.session_state['lista_prediction_BOAD5'], mode='lines+markers', name='Previsão de Falha da bomba BOAD5'))
-    # Títulos e rótulos dos eixos
+    
+    # Títulos e rótulos dos eixos para BOAD5
     fig5.update_layout(
         title='Previsão de Falha da bomba BOAD5 ao Longo dos Ciclos',
         xaxis_title='Número do Ciclo',
         yaxis_title='Previsão de Falha (Ciclos)',
         template='plotly_dark',  # Usando um tema escuro para o gráfico
     )
-    # Exibindo o gráfico no Streamlit
+    
+    # Exibindo o gráfico no Streamlit para BOAD5
     st.plotly_chart(fig5)
-
-        # Define o eixo X com o mesmo tamanho do eixo Y BOAD6
+    
+    
+    # Previsão de falha para BOAD6 (usando as últimas 30 previsões ou o que houver disponível)
     num_ciclos6 = list(range(1, len(st.session_state['lista_prediction_BOAD6']) + 1))
-    # Criação do gráfico interativo
+    
+    # Criação do gráfico interativo para BOAD6
     fig6 = go.Figure()
-    # Adicionando a linha ao gráfico
+    
+    # Adicionando a linha ao gráfico para BOAD6
     fig6.add_trace(go.Scatter(x=num_ciclos6, y=st.session_state['lista_prediction_BOAD6'], mode='lines+markers', name='Previsão de Falha da bomba BOAD6'))
-    # Títulos e rótulos dos eixos
-    fig.update_layout(
+    
+    # Títulos e rótulos dos eixos para BOAD6
+    fig6.update_layout(
         title='Previsão de Falha da bomba BOAD6 ao Longo dos Ciclos',
         xaxis_title='Número do Ciclo',
         yaxis_title='Previsão de Falha (Ciclos)',
         template='plotly_dark',  # Usando um tema escuro para o gráfico
     )
-    # Exibindo o gráfico no Streamlit
-    st.plotly_chart(fig6)
     
+    # Exibindo o gráfico no Streamlit para BOAD6
+    st.plotly_chart(fig6)
+
 
 
     if st.button("Voltar à Página Principal"):
