@@ -241,7 +241,7 @@ def results_page():
     # Previsão e gráfico para BOAD5
     st.markdown("""
     <div style="background-color: #007bff; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-        <h3 style="color: white; text-align: center;">Barragem - BOAD5</h3>
+        <h3 style="color: white; text-align: center;">BOAD5</h3>
     """, unsafe_allow_html=True)
 
     exibir_previsao_bomba(
@@ -275,7 +275,7 @@ def results_page():
     # Previsão e gráfico para BOAD6
     st.markdown("""
     <div style="background-color: #007bff; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-        <h3 style="color: white; text-align: center;">Barragem - BOAD6</h3>
+        <h3 style="color: white; text-align: center;">BOAD6</h3>
     """, unsafe_allow_html=True)
 
     exibir_previsao_bomba(
