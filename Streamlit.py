@@ -240,7 +240,7 @@ def results_page():
 
     # Previsão e gráfico para BOAD5
     st.markdown("""
-    <div style="background-color: #007bff; padding: 10px; border-radius: 10px; margin-bottom: 20px;">
+    <div style="background-color: #007bff; padding: 5px; border-radius: 10px; margin-bottom: 5px;">
         <h3 style="color: white; text-align: center;">BOAD5</h3>
     """, unsafe_allow_html=True)
 
@@ -274,7 +274,7 @@ def results_page():
 
     # Previsão e gráfico para BOAD6
     st.markdown("""
-    <div style="background-color: #007bff; padding: 10px; border-radius: 10px; margin-bottom: 20px;">
+    <div style="background-color: #007bff; padding: 5px; border-radius: 10px; margin-bottom: 20px;">
         <h3 style="color: white; text-align: center;">BOAD6</h3>
     """, unsafe_allow_html=True)
 
