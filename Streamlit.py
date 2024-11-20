@@ -202,15 +202,14 @@ def results_page():
     # Adicionando um divisor visual
     st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
     
-        # Define o eixo X com o mesmo tamanho do eixo Y
     num_ciclos = list(range(1, len(st.session_state['lista_prediction_BOAD5']) + 1))
-    
+    #num_ciclos = list(range(1, len(lista) + 1))
     # Criação do gráfico interativo
     fig = go.Figure()
     
     # Adicionando a linha ao gráfico
-    fig.add_trace(go.Scatter(x=num_ciclos, y=st.session_state['lista_prediction_BOAD5'], mode='lines+markers', name='Previsão de Falha'))
-    
+    #fig.add_trace(go.Scatter(x=num_ciclos, y=st.session_state['lista_prediction_BOAD5'], mode='lines+markers', name='Previsão de Falha'))
+    fig.add_trace(go.Scatter(x=num_ciclos, y=lista, mode='lines+markers', name='Previsão de Falha'))
     # Títulos e rótulos dos eixos
     fig.update_layout(
         title='Previsão de Falha ao Longo dos Ciclos',
@@ -221,7 +220,6 @@ def results_page():
     
     # Exibindo o gráfico no Streamlit
     st.plotly_chart(fig)
-
 
     if st.button("Voltar à Página Principal"):
         st.session_state['current_page'] = 'upload_page'
