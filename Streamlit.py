@@ -237,62 +237,64 @@ def results_page():
         """
     
     # Previsão e gráfico para BOAD5
-    st.markdown("""
-    <div style="border: 2px solid #000000; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-    """, unsafe_allow_html=True)
-    
-    # Exibir as informações da BOAD5 dentro do contêiner
-    st.markdown(
-        exibir_previsao_bomba(
-            nome_bomba="BOAD5",
-            ciclos=st.session_state.get("proxima_falha_BOAD5_ciclos"),
-            segundos=st.session_state.get("proxima_falha_BOAD5_segundos")
-        ),
-        unsafe_allow_html=True
-    )
-    
-    # Gráfico da BOAD5 dentro do mesmo contêiner
-    num_ciclos5 = list(range(1, len(st.session_state['lista_prediction_BOAD5']) + 1))
-    fig5 = go.Figure()
-    fig5.add_trace(go.Scatter(x=num_ciclos5, y=st.session_state['lista_prediction_BOAD5'], mode='lines+markers', name='Previsão de Falha da bomba BOAD5'))
-    fig5.update_layout(
-        title='Previsão de Falha da bomba BOAD5 ao Longo dos Ciclos',
-        xaxis_title='Número do Ciclo',
-        yaxis_title='Previsão de Falha (Ciclos)',
-        template='plotly_dark',
-    )
-    st.plotly_chart(fig5)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
+    with st.container():
+        st.markdown("""
+        <div style="border: 2px solid #000000; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        """, unsafe_allow_html=True)
+        
+        # Exibir as informações da BOAD5 dentro do contêiner
+        st.markdown(
+            exibir_previsao_bomba(
+                nome_bomba="BOAD5",
+                ciclos=st.session_state.get("proxima_falha_BOAD5_ciclos"),
+                segundos=st.session_state.get("proxima_falha_BOAD5_segundos")
+            ),
+            unsafe_allow_html=True
+        )
+        
+        # Gráfico da BOAD5 dentro do mesmo contêiner
+        num_ciclos5 = list(range(1, len(st.session_state['lista_prediction_BOAD5']) + 1))
+        fig5 = go.Figure()
+        fig5.add_trace(go.Scatter(x=num_ciclos5, y=st.session_state['lista_prediction_BOAD5'], mode='lines+markers', name='Previsão de Falha da bomba BOAD5'))
+        fig5.update_layout(
+            title='Previsão de Falha da bomba BOAD5 ao Longo dos Ciclos',
+            xaxis_title='Número do Ciclo',
+            yaxis_title='Previsão de Falha (Ciclos)',
+            template='plotly_dark',
+        )
+        st.plotly_chart(fig5)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
     
     # Previsão e gráfico para BOAD6
-    st.markdown("""
-    <div style="border: 2px solid #000000; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-    """, unsafe_allow_html=True)
-    
-    # Exibir as informações da BOAD6 dentro do contêiner
-    st.markdown(
-        exibir_previsao_bomba(
-            nome_bomba="BOAD6",
-            ciclos=st.session_state.get("proxima_falha_BOAD6_ciclos"),
-            segundos=st.session_state.get("proxima_falha_BOAD6_segundos")
-        ),
-        unsafe_allow_html=True
-    )
-    
-    # Gráfico da BOAD6 dentro do mesmo contêiner
-    num_ciclos6 = list(range(1, len(st.session_state['lista_prediction_BOAD6']) + 1))
-    fig6 = go.Figure()
-    fig6.add_trace(go.Scatter(x=num_ciclos6, y=st.session_state['lista_prediction_BOAD6'], mode='lines+markers', name='Previsão de Falha da bomba BOAD6'))
-    fig6.update_layout(
-        title='Previsão de Falha da bomba BOAD6 ao Longo dos Ciclos',
-        xaxis_title='Número do Ciclo',
-        yaxis_title='Previsão de Falha (Ciclos)',
-        template='plotly_dark',
-    )
-    st.plotly_chart(fig6)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
+    with st.container():
+        st.markdown("""
+        <div style="border: 2px solid #000000; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        """, unsafe_allow_html=True)
+        
+        # Exibir as informações da BOAD6 dentro do contêiner
+        st.markdown(
+            exibir_previsao_bomba(
+                nome_bomba="BOAD6",
+                ciclos=st.session_state.get("proxima_falha_BOAD6_ciclos"),
+                segundos=st.session_state.get("proxima_falha_BOAD6_segundos")
+            ),
+            unsafe_allow_html=True
+        )
+        
+        # Gráfico da BOAD6 dentro do contêiner
+        num_ciclos6 = list(range(1, len(st.session_state['lista_prediction_BOAD6']) + 1))
+        fig6 = go.Figure()
+        fig6.add_trace(go.Scatter(x=num_ciclos6, y=st.session_state['lista_prediction_BOAD6'], mode='lines+markers', name='Previsão de Falha da bomba BOAD6'))
+        fig6.update_layout(
+            title='Previsão de Falha da bomba BOAD6 ao Longo dos Ciclos',
+            xaxis_title='Número do Ciclo',
+            yaxis_title='Previsão de Falha (Ciclos)',
+            template='plotly_dark',
+        )
+        st.plotly_chart(fig6)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 
