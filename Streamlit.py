@@ -164,11 +164,6 @@ def upload_page():
                         
 
 
-
-
-                           
-                       
-
                            
                         print(st.session_state["previsoes_ultimos_ciclos"])
 
@@ -198,7 +193,7 @@ def results_page():
     </div>
     """, unsafe_allow_html=True)
     
-       # Função para exibir as informações de falha
+    # Função para exibir as informações de falha
     def exibir_previsao_bomba(nome_bomba, ciclos, segundos):
         if ciclos is None or segundos is None:
             st.markdown(f"""
@@ -206,6 +201,9 @@ def results_page():
                 ⚠️ Atenção: Não há dados suficientes para prever falhas na bomba {nome_bomba}.</h3>
             """, unsafe_allow_html=True)
             return
+    
+        # Arredonda ciclos para não mostrar casas decimais
+        ciclos = int(ciclos)
     
         # Calcula os dias e horas com base nos segundos
         dias, horas = to_days_and_hours(segundos)
@@ -256,14 +254,6 @@ def results_page():
         segundos=st.session_state.get("proxima_falha_BOAD5_segundos")
     )
     
-    # Exibe as informações para BOAD6
-    exibir_previsao_bomba(
-        nome_bomba="BOAD6",
-        ciclos=st.session_state.get("proxima_falha_BOAD6_ciclos"),
-        segundos=st.session_state.get("proxima_falha_BOAD6_segundos")
-    )
-
-    
     # Previsão de falha para BOAD5 (usando as últimas 30 previsões ou o que houver disponível)
     num_ciclos5 = list(range(1, len(st.session_state['lista_prediction_BOAD5']) + 1))
     
@@ -284,6 +274,12 @@ def results_page():
     # Exibindo o gráfico no Streamlit para BOAD5
     st.plotly_chart(fig5)
     
+    # Exibe as informações para BOAD6
+    exibir_previsao_bomba(
+        nome_bomba="BOAD6",
+        ciclos=st.session_state.get("proxima_falha_BOAD6_ciclos"),
+        segundos=st.session_state.get("proxima_falha_BOAD6_segundos")
+    )
     
     # Previsão de falha para BOAD6 (usando as últimas 30 previsões ou o que houver disponível)
     num_ciclos6 = list(range(1, len(st.session_state['lista_prediction_BOAD6']) + 1))
@@ -304,6 +300,7 @@ def results_page():
     
     # Exibindo o gráfico no Streamlit para BOAD6
     st.plotly_chart(fig6)
+
 
 
 
