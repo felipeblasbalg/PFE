@@ -108,13 +108,20 @@ def upload_page():
                         st.session_state["proxima_falha_BOAD6_ciclos"] = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])[-1]
                         st.session_state["proxima_falha_BOAD6_segundos"] = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])[-1] * average_cycle_duration
                            
-                        # No momento de fazer a previsão (dentro da função upload_page):
+                        #previsão previa BOAD5 (dentro da função upload_page):
                         if 'lista_prediction_BOAD5' not in st.session_state:
                             st.session_state['lista_prediction_BOAD5'] = []  # Defina uma lista vazia caso não exista
-                        
                         # Agora, adicione a nova previsão à lista
                         st.session_state['lista_prediction_BOAD5'] = list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])[-30:] if len(list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])) > 30 else list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])
+                           
+                        #previsçao prévia BOAD6 (dentro da função upload_page):
+                        if 'lista_prediction_BOAD5' not in st.session_state:
+                            st.session_state['lista_prediction_BOAD6'] = []  # Defina uma lista vazia caso não exista
+                        # Agora, adicione a nova previsão à lista
+                        st.session_state['lista_prediction_BOAD6'] = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])[-30:] if len(list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])) > 30 else list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])
                                                
+
+                           
                         print(st.session_state["previsoes_ultimos_ciclos"])
 
                         st.session_state['data_verificada'] = True
@@ -202,25 +209,38 @@ def results_page():
     # Adicionando um divisor visual
     st.markdown("<div style='height: 2px; background-color: #007bff; margin: 20px 0;'></div>", unsafe_allow_html=True)
     
-        # Define o eixo X com o mesmo tamanho do eixo Y
-    num_ciclos = list(range(1, len(st.session_state['lista_prediction_BOAD5']) + 1))
-    
+        # Define o eixo X com o mesmo tamanho do eixo Y BOAD5
+    num_ciclos5 = list(range(1, len(st.session_state['lista_prediction_BOAD5']) + 1))
     # Criação do gráfico interativo
-    fig = go.Figure()
-    
+    fig5 = go.Figure()
     # Adicionando a linha ao gráfico
-    fig.add_trace(go.Scatter(x=num_ciclos, y=st.session_state['lista_prediction_BOAD5'], mode='lines+markers', name='Previsão de Falha da bomba BOAD5'))
-    
+    fig5.add_trace(go.Scatter(x=num_ciclos5, y=st.session_state['lista_prediction_BOAD5'], mode='lines+markers', name='Previsão de Falha da bomba BOAD5'))
     # Títulos e rótulos dos eixos
-    fig.update_layout(
-        title='Previsão de Falha ao Longo dos Ciclos',
+    fig5.update_layout(
+        title='Previsão de Falha da bomba BOAD5 ao Longo dos Ciclos',
         xaxis_title='Número do Ciclo',
         yaxis_title='Previsão de Falha (Ciclos)',
         template='plotly_dark',  # Usando um tema escuro para o gráfico
     )
-    
     # Exibindo o gráfico no Streamlit
-    st.plotly_chart(fig)
+    st.plotly_chart(fig5)
+
+        # Define o eixo X com o mesmo tamanho do eixo Y BOAD6
+    num_ciclos6 = list(range(1, len(st.session_state['lista_prediction_BOAD6']) + 1))
+    # Criação do gráfico interativo
+    fig6 = go.Figure()
+    # Adicionando a linha ao gráfico
+    fig6.add_trace(go.Scatter(x=num_ciclos6, y=st.session_state['lista_prediction_BOAD6'], mode='lines+markers', name='Previsão de Falha da bomba BOAD6'))
+    # Títulos e rótulos dos eixos
+    fig.update_layout(
+        title='Previsão de Falha da bomba BOAD6 ao Longo dos Ciclos',
+        xaxis_title='Número do Ciclo',
+        yaxis_title='Previsão de Falha (Ciclos)',
+        template='plotly_dark',  # Usando um tema escuro para o gráfico
+    )
+    # Exibindo o gráfico no Streamlit
+    st.plotly_chart(fig6)
+    
 
 
     if st.button("Voltar à Página Principal"):
