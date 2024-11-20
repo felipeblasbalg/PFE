@@ -196,17 +196,18 @@ def results_page():
     # Função para exibir as informações de falha
     def exibir_previsao_bomba(nome_bomba, ciclos, segundos):
         if ciclos is None or segundos is None:
-            return f"""
-            <h3 style="color:#721c24; text-align: center; font-family: Arial, sans-serif;">
-            ⚠️ Atenção: Não há dados suficientes para prever falhas na bomba {nome_bomba}.</h3>
-            """
-    
+            st.markdown(f"""
+                <h3 style="color:#721c24; text-align: center; font-family: Arial, sans-serif;">
+                ⚠️ Atenção: Não há dados suficientes para prever falhas na bomba {nome_bomba}.</h3>
+            """, unsafe_allow_html=True)
+            return
+
         # Arredonda ciclos para não mostrar casas decimais
         ciclos = int(ciclos)
-    
+
         # Calcula os dias e horas com base nos segundos
         dias, horas = to_days_and_hours(segundos)
-    
+
         # Define as cores e mensagens com base no número de ciclos
         if ciclos <= 5:
             cor_texto = "#721c24"  # Vermelho escuro
@@ -220,84 +221,78 @@ def results_page():
             cor_texto = "#155724"  # Verde escuro
             icone = "✅"
             mensagem = f"A bomba {nome_bomba} está funcionando com segurança, próxima falha em {ciclos} ciclos."
-    
-        # Retorna a mensagem formatada como HTML
-        return f"""
-        <h3 style='color:{cor_texto}; text-align: center; font-family: Arial, sans-serif;'>{icone} {mensagem}</h3>
-        <p style='color:{cor_texto}; text-align: center; font-size: 18px;'>Isso deve ocorrer em, aproximadamente {dias} dias e {horas} horas.</p>
-        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; color: {cor_texto};">
-            <span>Falha prevista para:</span>
-            <div style="background-color: #000000; color: #ffffff; font-size: 30px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
-                {ciclos} ciclos
-            </div>
-            <div style="background-color: #000000; color: #ffffff; font-size: 25px; font-weight: bold; padding: 15px; width: 160px; border-radius: 10px; text-align: center;">
-                {dias}d {horas}h
-            </div>
-        </div>
-        """
-    
+
+        # Exibe a mensagem de previsão
+        st.markdown(f"<h3 style='color:{cor_texto}; text-align: center; font-family: Arial, sans-serif;'>{icone} {mensagem}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<p style='color:{cor_texto}; text-align: center; font-size: 18px;'>Isso deve ocorrer em, aproximadamente {dias} dias e {horas} horas.</p>", unsafe_allow_html=True)
+
     # Previsão e gráfico para BOAD5
-    with st.container():
-        st.markdown("""
-        <div style="border: 2px solid #000000; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-        """, unsafe_allow_html=True)
-        
-        # Exibir as informações da BOAD5 dentro do contêiner
-        st.markdown(
-            exibir_previsao_bomba(
-                nome_bomba="BOAD5",
-                ciclos=st.session_state.get("proxima_falha_BOAD5_ciclos"),
-                segundos=st.session_state.get("proxima_falha_BOAD5_segundos")
-            ),
-            unsafe_allow_html=True
-        )
-        
-        # Gráfico da BOAD5 dentro do mesmo contêiner
-        num_ciclos5 = list(range(1, len(st.session_state['lista_prediction_BOAD5']) + 1))
-        fig5 = go.Figure()
-        fig5.add_trace(go.Scatter(x=num_ciclos5, y=st.session_state['lista_prediction_BOAD5'], mode='lines+markers', name='Previsão de Falha da bomba BOAD5'))
-        fig5.update_layout(
-            title='Previsão de Falha da bomba BOAD5 ao Longo dos Ciclos',
-            xaxis_title='Número do Ciclo',
-            yaxis_title='Previsão de Falha (Ciclos)',
-            template='plotly_dark',
-        )
-        st.plotly_chart(fig5)
-        
-        st.markdown("</div>", unsafe_allow_html=True)
-    
+    st.markdown("""
+    <div style="background-color: #007bff; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h3 style="color: white; text-align: center;">BOAD5</h3>
+    """, unsafe_allow_html=True)
+
+    exibir_previsao_bomba(
+        nome_bomba="BOAD5",
+        ciclos=st.session_state.get("proxima_falha_BOAD5_ciclos"),
+        segundos=st.session_state.get("proxima_falha_BOAD5_segundos")
+    )
+
+    # Previsão de falha para BOAD5 (usando as últimas 30 previsões ou o que houver disponível)
+    num_ciclos5 = list(range(1, len(st.session_state['lista_prediction_BOAD5']) + 1))
+
+    # Criação do gráfico interativo para BOAD5
+    fig5 = go.Figure()
+
+    # Adicionando a linha ao gráfico para BOAD5
+    fig5.add_trace(go.Scatter(x=num_ciclos5, y=st.session_state['lista_prediction_BOAD5'], mode='lines+markers', name='Previsão de Falha da bomba BOAD5'))
+
+    # Títulos e rótulos dos eixos para BOAD5
+    fig5.update_layout(
+        title='Previsão de Falha da bomba BOAD5 ao Longo dos Ciclos',
+        xaxis_title='Número do Ciclo',
+        yaxis_title='Previsão de Falha (Ciclos)',
+        template='plotly_dark',  # Usando um tema escuro para o gráfico
+    )
+
+    # Exibindo o gráfico no Streamlit para BOAD5
+    st.plotly_chart(fig5)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
     # Previsão e gráfico para BOAD6
-    with st.container():
-        st.markdown("""
-        <div style="border: 2px solid #000000; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-        """, unsafe_allow_html=True)
-        
-        # Exibir as informações da BOAD6 dentro do contêiner
-        st.markdown(
-            exibir_previsao_bomba(
-                nome_bomba="BOAD6",
-                ciclos=st.session_state.get("proxima_falha_BOAD6_ciclos"),
-                segundos=st.session_state.get("proxima_falha_BOAD6_segundos")
-            ),
-            unsafe_allow_html=True
-        )
-        
-        # Gráfico da BOAD6 dentro do contêiner
-        num_ciclos6 = list(range(1, len(st.session_state['lista_prediction_BOAD6']) + 1))
-        fig6 = go.Figure()
-        fig6.add_trace(go.Scatter(x=num_ciclos6, y=st.session_state['lista_prediction_BOAD6'], mode='lines+markers', name='Previsão de Falha da bomba BOAD6'))
-        fig6.update_layout(
-            title='Previsão de Falha da bomba BOAD6 ao Longo dos Ciclos',
-            xaxis_title='Número do Ciclo',
-            yaxis_title='Previsão de Falha (Ciclos)',
-            template='plotly_dark',
-        )
-        st.plotly_chart(fig6)
-        
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="background-color: #007bff; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h3 style="color: white; text-align: center;">BOAD6</h3>
+    """, unsafe_allow_html=True)
 
+    exibir_previsao_bomba(
+        nome_bomba="BOAD6",
+        ciclos=st.session_state.get("proxima_falha_BOAD6_ciclos"),
+        segundos=st.session_state.get("proxima_falha_BOAD6_segundos")
+    )
 
+    # Previsão de falha para BOAD6 (usando as últimas 30 previsões ou o que houver disponível)
+    num_ciclos6 = list(range(1, len(st.session_state['lista_prediction_BOAD6']) + 1))
 
+    # Criação do gráfico interativo para BOAD6
+    fig6 = go.Figure()
+
+    # Adicionando a linha ao gráfico para BOAD6
+    fig6.add_trace(go.Scatter(x=num_ciclos6, y=st.session_state['lista_prediction_BOAD6'], mode='lines+markers', name='Previsão de Falha da bomba BOAD6'))
+
+    # Títulos e rótulos dos eixos para BOAD6
+    fig6.update_layout(
+        title='Previsão de Falha da bomba BOAD6 ao Longo dos Ciclos',
+        xaxis_title='Número do Ciclo',
+        yaxis_title='Previsão de Falha (Ciclos)',
+        template='plotly_dark',  # Usando um tema escuro para o gráfico
+    )
+
+    # Exibindo o gráfico no Streamlit para BOAD6
+    st.plotly_chart(fig6)
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 
