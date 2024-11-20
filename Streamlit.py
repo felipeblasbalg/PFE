@@ -241,7 +241,7 @@ def results_page():
     # Previsão e gráfico para BOAD5
     st.markdown("""
     <div style="background-color: #007bff; padding: 10px; border-radius: 10px; margin-bottom: 20px;">
-        <h3 style="color: white; text-align: center;">BOAD5</h3>
+        <h3 style="color: white; text-align: center;">BOkghjvjhvjvhvAD5</h3>
     """, unsafe_allow_html=True)
 
     exibir_previsao_bomba(
