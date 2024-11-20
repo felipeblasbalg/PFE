@@ -312,6 +312,7 @@ def results_page():
 
 
 
+
     if st.button("Voltar à Página Principal"):
         st.session_state['current_page'] = 'upload_page'
         st.rerun()  # Recarrega a página para mostrar a página principal
