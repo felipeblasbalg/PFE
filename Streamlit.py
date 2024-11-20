@@ -28,6 +28,12 @@ user_credentials = {
     "operador1": "alupar"
 }
 
+def to_days_and_hours(seconds):
+    days = int(seconds // (24 * 60 * 60))
+    seconds = seconds % (24 * 60 * 60)
+    hours = round(seconds / (60 * 60))
+    return days, hours
+
 # Função de verificação de login
 def login_page():
     st.title("🔐 Login")
@@ -96,8 +102,11 @@ def upload_page():
                         print("Predição                                 OK")
                         df_predictions, average_cycle_duration = analysis_object.predict()
                         st.session_state["previsoes_ultimos_ciclos"] = list(df_predictions["Prediction"])
-                        st.session_state["proxima_falha_ciclos"] = list(df_predictions["Prediction"])[-1]
-                        st.session_state["proxima_falha_segundos"] = list(df_predictions["Prediction"])[-1] * average_cycle_duration
+                        st.session_state["bombas_principais_ultimos_ciclos"] = list(df_predictions["MainPump"])
+                        st.session_state["proxima_falha_BOAD5_ciclos"] = list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])[-1]
+                        st.session_state["proxima_falha_BOAD5_segundos"] = list(df_predictions[df_predictions["MainPump"] == 5]["Prediction"])[-1] * average_cycle_duration
+                        st.session_state["proxima_falha_BOAD6_ciclos"] = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])[-1]
+                        st.session_state["proxima_falha_BOAD6_segundos"] = list(df_predictions[df_predictions["MainPump"] == 6]["Prediction"])[-1] * average_cycle_duration
                            
                         # No momento de fazer a previsão (dentro da função upload_page):
                         if 'lista_prediction_anteriores' not in st.session_state:
@@ -105,7 +114,6 @@ def upload_page():
                         
                         # Agora, adicione a nova previsão à lista
                         st.session_state['lista_prediction_anteriores'] = list(df_predictions["Prediction"])[-30:] if len(list(df_predictions["Prediction"])) > 30 else list(df_predictions["Prediction"])
-
                                                
                         print(st.session_state["previsoes_ultimos_ciclos"])
 
@@ -134,18 +142,27 @@ def results_page():
         <p style="color: #e2f5e9; text-align: center;">Os resultados detalhados dos dados carregados estão disponíveis abaixo.</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # obtendo a previsão de ciclos até a falha
+    proxima_falha_BOAD5_ciclos = round(st.session_state["proxima_falha_BOAD5_ciclos"])
+    proxima_falha_BOAD6_ciclos = round(st.session_state["proxima_falha_BOAD6_ciclos"])
+    proxima_falha_ciclos = min(proxima_falha_BOAD5_ciclos, proxima_falha_BOAD6_ciclos)
+
+    # obtendo a previsão de segundos até a falha
+    proxima_falha_BOAD5_segundos = round(st.session_state["proxima_falha_BOAD5_segundos"])
+    proxima_falha_BOAD6_segundos = round(st.session_state["proxima_falha_BOAD6_segundos"])
+    proxima_falha_segundos = min(proxima_falha_BOAD5_segundos, proxima_falha_BOAD6_segundos)
 
     # calcula quantos em quantos dias e horas a falha deve ocorrer
-    seconds = st.session_state["proxima_falha_segundos"]
-    days = int(seconds // (24 * 60 * 60))
-    seconds = seconds % (24 * 60 * 60)
-    hours = round(seconds / (60 * 60))
-    
+    proxima_falha_BOAD5_dias, proxima_falha_BOAD5_horas = to_days_and_hours(proxima_falha_BOAD5_segundos)
+    proxima_falha_BOAD6_dias, proxima_falha_BOAD6_horas = to_days_and_hours(proxima_falha_BOAD6_segundos)
+    days, hours = to_days_and_hours(proxima_falha_segundos)
 
-
-    # Obtendo a previsão de ciclos até a falha
-    proxima_falha_ciclos = int(st.session_state["proxima_falha_ciclos"])  # Ignorando casas decimais
-    
+    st.markdown(f"""
+        Bomba BOAD5 como principal: {proxima_falha_BOAD5_ciclos} ciclos, o que deve demorar aproximadamente {proxima_falha_BOAD5_dias} dias e {proxima_falha_BOAD5_horas} horas.
+        
+        Bomba BOAD6 como principal: {proxima_falha_BOAD6_ciclos} ciclos, o que deve demorar aproximadamente {proxima_falha_BOAD6_dias} dias e {proxima_falha_BOAD6_horas} horas.
+    """, unsafe_allow_html=True)
     
     # Estilos para as mensagens
     if proxima_falha_ciclos <= 5:
