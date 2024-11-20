@@ -192,8 +192,20 @@ def results_page():
         <p style="color: #e2f5e9; text-align: center;">Os resultados detalhados dos dados carregados estão disponíveis abaixo.</p>
     </div>
     """, unsafe_allow_html=True)
+
+    # Função da página de resultados
+def results_page():
+    st.title("Resultados da Análise dos Dados")
     
-        # Função para exibir as informações de falha
+    # Cabeçalho visual para a página de resultados
+    st.markdown("""
+    <div style="background-color: #28a745; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        <h2 style="color: white; text-align: center;">📈 Análise Completa</h2>
+        <p style="color: #e2f5e9; text-align: center;">Os resultados detalhados dos dados carregados estão disponíveis abaixo.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Função para exibir as informações de falha
     def exibir_previsao_bomba(nome_bomba, ciclos, segundos):
         if ciclos is None or segundos is None:
             st.markdown(f"""
@@ -239,10 +251,9 @@ def results_page():
             </div>
         """, unsafe_allow_html=True)
     
-    
     # Previsão e gráfico para BOAD5
     st.markdown("""
-    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 50px; border: 1px solid #ccc; margin-bottom: 20px;">
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 50px; border: 2px solid #000; margin-bottom: 20px;">
     """, unsafe_allow_html=True)
     
     exibir_previsao_bomba(
@@ -273,10 +284,9 @@ def results_page():
     
     st.markdown("</div>", unsafe_allow_html=True)
     
-    
     # Previsão e gráfico para BOAD6
     st.markdown("""
-    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 50px; border: 1px solid #ccc; margin-bottom: 20px;">
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 50px; border: 2px solid #000; margin-bottom: 20px;">
     """, unsafe_allow_html=True)
     
     exibir_previsao_bomba(
@@ -306,6 +316,8 @@ def results_page():
     st.plotly_chart(fig6)
     
     st.markdown("</div>", unsafe_allow_html=True)
+
+
 
 
 
